@@ -1,34 +1,48 @@
 package grab
 
 import (
+	"awesomeProject1/cpu"
 	"fmt"
 	"io/ioutil"
 	"os"
 	"os/exec"
 	"strconv"
 	"strings"
+	"time"
 )
 
 type Police struct {
-	Pid string
+	Pid       string
+	tick      int64
+	threshold float64
 }
 
-func NewPolice(Pid string) *Police {
+func NewPolice(Pid string, tick int64, threshold float64) *Police {
 	return &Police{
-		Pid: Pid,
+		Pid:       Pid,
+		tick:      tick,
+		threshold: threshold,
 	}
 }
 
 func (p *Police) Start() {
 	go func() {
 		for {
+			if p.tick == 0 {
+				p.tick = 1
+			}
+			time.Sleep(time.Duration(p.tick) * time.Second)
 			// 监听 CPU, CPU 触发指标时, 就根据 top 获取 thread, 并抓取堆栈
-			p.process()
+			_, f, _ := cpu.Get()
+			// 触发
+			if f > p.threshold {
+				p.parseThreadContentAndDump()
+			}
 		}
 	}()
 }
 
-func (p *Police) process() {
+func (p *Police) parseThreadContentAndDump() {
 	thread := getTopJavaThread(p.Pid)
 	dumpTopThreadStack(thread, p.Pid)
 }
@@ -46,7 +60,7 @@ func dumpTopThreadStack(treads []string, pid string) {
 	cmd := "jstack -l " + pid + " > " + fileName
 	exec.Command("bash", "-c", cmd)
 
-	// 10 进制转成 16 进制
+	// 10 进制转成 16 进制 printf '%x\n' $threadId
 	treadList := []string{}
 
 	for _, tread := range treads {
@@ -67,10 +81,12 @@ func dumpTopThreadStack(treads []string, pid string) {
 
 	split := strings.Split(string(content), "\r\n")
 
+	output, _ := os.Open(pid + time.Now().String() + ".txt")
+
 	for _, line := range split {
 		for _, threadNum := range treadList {
 			if strings.Contains(line, threadNum) {
-				fmt.Println(line)
+				output.WriteString(line + "\r\n")
 			}
 		}
 	}
