@@ -77,6 +77,9 @@ func dumpTopThreadStack(subThreadList []SubThread, pid string) {
 				output.WriteString(line + ", CPUPercent= " + strconv.Itoa(int(threadNum.CPUPercent)) + ", " +
 					"parentCPUPercent = " + strconv.Itoa(int(threadNum.parentCPUPercent)) + "\r\n")
 				for i := idx; i < idx + 10; i++ {
+					if i >= len(split) {
+						break
+					}
 					output.WriteString(split[i] + "\n")
 				}
 			}
