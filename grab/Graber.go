@@ -1,7 +1,6 @@
 package grab
 
 import (
-	"awesomeProject1/cpu"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -15,13 +14,13 @@ import (
 var Layout = "2006-01-02 15:04:05"
 
 type Police struct {
-	Pid       string
+	Pid       int32
 	tick      int64
 	threshold int
 	sleep     int
 }
 
-func NewPolice(Pid string, tick int64, threshold int, sleep int) *Police {
+func NewPolice(Pid int32, tick int64, threshold int, sleep int) *Police {
 	return &Police{
 		Pid:       Pid,
 		tick:      tick,
@@ -37,41 +36,17 @@ func (p *Police) Start() {
 				p.tick = 1
 			}
 			time.Sleep(time.Duration(p.tick) * time.Second)
-			//// 监听 CPU, CPU 触发指标时, 就根据 top 获取 thread, 并抓取堆栈
-			////cmd := " top -Hp " + pid
-			//shell := "../getCpu.sh"
-			//c := exec.Command(shell, "vale", p.Pid)
-			//err := c.Start() //运行脚本
-			//if nil != err {
-			//	fmt.Println(err)
-			//}
-			//if c.Process == nil {
-			//	fmt.Println("Process PID is nil, golang exit....")
-			//	return
-			//}
-			//fmt.Println("Process PID:", c.Process.Pid)
-			//err = c.Wait() //等待执行完成
-			//
-			//output, _ := c.CombinedOutput()
-			//f, _ := strconv.Atoi(string(output))
-			atoi, err := strconv.Atoi(p.Pid)
-			if err != nil {
-				return
-			}
-			f := cpu.Get2(atoi)
-
-			// 触发
-			log.Println("f = ", int(f))
-			if int(f) > p.threshold {
-				p.parseThreadContentAndDump()
-			}
+			p.parseThreadContentAndDump()
 		}
 	}()
 }
 
 func (p *Police) parseThreadContentAndDump() {
-	thread := getTopJavaThread(p.Pid)
-	dumpTopThreadStack(thread, p.Pid)
+	thread := GetThreads(p.Pid, float64(p.threshold))
+	if thread == nil {
+		return
+	}
+	dumpTopThreadStack(thread, strconv.Itoa(int(p.Pid)))
 }
 
 func getTopJavaThread(pid string) []string {

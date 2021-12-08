@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-var Pid string
+var Pid int
 var tick int64
 var threshold int
 var sleep int
@@ -19,7 +19,7 @@ func main() {
 	// parse
 	parseArgs()
 	// start
-	grab.NewPolice(Pid, tick, threshold, sleep).Start()
+	grab.NewPolice(int32(Pid), tick, threshold, sleep).Start()
 
 	// wait
 	group := sync.WaitGroup{}
@@ -30,7 +30,7 @@ func main() {
 
 // ./main -pid 23751 -tick 1 -threshold 8 -sleep 2
 func parseArgs() {
-	flag.StringVar(&Pid, "pid", "23751", "java pid")
+	flag.IntVar(&Pid, "pid", 23751, "java pid")
 	flag.Int64Var(&tick, "tick", 1, "check cpu time tick")
 	flag.IntVar(&threshold, "threshold", 1, "grab cpu threshold")
 	flag.IntVar(&sleep, "sleep", 3, "garb cpu sleep")
