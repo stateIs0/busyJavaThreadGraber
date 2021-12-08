@@ -58,17 +58,56 @@ func GetThreads(pid int32, threshold float64) []string {
 	if len(string(output)) > 0 {
 
 		str := string(output)
-		split := strings.Split(str, "\r\n")
+		split := strings.Split(str, "\n")
+
+		chann := make(chan SubThread, len(split)-1)
+
 		for i, line := range split {
 			if i == 0 {
 				continue
 			}
 			lineArr := strings.Split(line, " ")
 			subThread := lineArr[0]
-			threads = append(threads, subThread)
+			atoi, err := strconv.Atoi(subThread)
+			if err != nil {
+				return nil
+			}
+
+			go func() {
+				subPro, _ := process.NewProcess(int32(atoi))
+				percent, _ := subPro.CPUPercent()
+				s := SubThread{
+					pid:        subThread,
+					CPUPercent: percent,
+				}
+				chann <- s
+			}()
+
+		}
+
+		for true {
+			select {
+			case data, ok := <-chann:
+				if ok {
+					if data.CPUPercent > 10 {
+						log.Println("sub cost ", data)
+						threads = append(threads, data.pid)
+					}
+				}
+			default:
+				if len(threads) >= len(split)-1 {
+					log.Println("threads len --->> 2 " + strconv.Itoa(len(threads)))
+					return threads
+				}
+			}
 		}
 	}
 	log.Println("threads len --->>" + strconv.Itoa(len(threads)))
 	return threads
 
+}
+
+type SubThread struct {
+	pid        string
+	CPUPercent float64
 }
