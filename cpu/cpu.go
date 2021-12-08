@@ -53,7 +53,6 @@ func Get2(pid int) float64 {
 				ft = append(ft, t)
 			}
 		}
-		log.Println(len(ft), ft)
 		pid, err := strconv.Atoi(ft[1])
 		if err != nil {
 			continue
