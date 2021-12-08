@@ -58,6 +58,7 @@ func dumpTopThreadStack(subThreadList []*SubThread, pid string) {
 		log.Println("jstack error >>>>>>", err)
 		return
 	}
+	log.Println("jstack success")
 
 	split := strings.Split(string(jstackContent), "\n")
 
@@ -77,6 +78,7 @@ func dumpTopThreadStack(subThreadList []*SubThread, pid string) {
 	for idx, line := range split {
 		for _, subThread := range subThreadList {
 			if strings.Contains(line, subThread.pid16) {
+				log.Println("匹配 pid16 ",subThread.pid16 )
 				output.WriteString(line + ",pid16= " + subThread.pid16 + ", CPUPercent= " + strconv.Itoa(int(subThread.CPUPercent)) + ", " +
 					"parentCPUPercent = " + strconv.Itoa(int(subThread.parentCPUPercent)) + "\r\n")
 				for i := idx + 1; i < idx+20; i++ {

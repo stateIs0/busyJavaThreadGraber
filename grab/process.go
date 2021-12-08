@@ -5,10 +5,8 @@ import (
 	"github.com/shirou/gopsutil/process"
 	"log"
 	"os/exec"
-	"sort"
 	"strconv"
 	"strings"
-	"sync"
 	"time"
 )
 
@@ -119,98 +117,6 @@ func getThreadDetail2(goPid string, user string) []*SubThread {
 
 }
 
-func getThreadDetail(threads []int) []*SubThread {
-
-	subThreads := []*SubThread{}
-	stop := make(chan string)
-	wg := sync.WaitGroup{}
-	chann := make(chan *SubThread, len(threads))
-
-	go func() {
-		for true {
-			select {
-			case data, ok := <-chann:
-				wg.Done()
-				if ok {
-					if data.CPUPercent >= 0 {
-						subThreads = append(subThreads, data)
-					}
-				}
-			case <-stop:
-				return
-			}
-		}
-	}()
-
-	for _, tt := range threads {
-		go func(goPid int) {
-			log.Println("--------> 执行 Percent ", goPid)
-			wg.Add(1)
-			subPro, _ := process.NewProcess(int32(goPid))
-			percent, _ := subPro.Percent(3 * time.Second)
-			log.Println("--------> 执行 Percent ", goPid, ", result ", percent)
-			s := &SubThread{
-				pid:        goPid,
-				CPUPercent: percent,
-				pid16:      fmt.Sprintf("%x", goPid),
-			}
-			chann <- s
-		}(tt)
-	}
-
-	wg.Wait()
-	stop <- ""
-	sort.SliceStable(subThreads, func(i, j int) bool {
-		if subThreads[i].CPUPercent > subThreads[j].CPUPercent {
-			return true
-		}
-		return false
-	})
-	if len(subThreads) >= 10 {
-		return subThreads[0:10]
-	} else {
-		return subThreads[0:]
-	}
-}
-
-func getSubThread(pid int32) []int {
-
-	result := []int{}
-
-	cmd := "ps -T -p " + strconv.Itoa(int(pid))
-	c := exec.Command("bash", "-c", cmd)
-
-	output, err := c.CombinedOutput()
-	if err != nil {
-		log.Println(err)
-	}
-
-	if len(string(output)) > 0 {
-		str := string(output)
-		split := strings.Split(str, "\n")
-		log.Println("子线程数量:", len(split)-1)
-		for i, line := range split {
-			if i == 0 {
-				continue
-			}
-			lineArr := strings.Split(line, " ")
-			if len(lineArr) < 2 {
-				continue
-			}
-			// 线程号
-			subThread := lineArr[1]
-			atoi, err := strconv.Atoi(subThread)
-			if err != nil {
-				continue
-			}
-			result = append(result, atoi)
-		}
-	}
-
-	return result
-
-}
-
 type SubThread struct {
 	pid              int
 	pid16            string
@@ -219,6 +125,6 @@ type SubThread struct {
 }
 
 func (s *SubThread) String() string  {
-	return fmt.Sprintf("pid %d, pid16 %s, parentCPUPercent %f, CPUPercent %f ",
+	return fmt.Sprintf("pid %d, pid16 %x, parentCPUPercent %f, CPUPercent %f \n",
 		s.pid, s.pid16, s.parentCPUPercent, s.CPUPercent)
 }

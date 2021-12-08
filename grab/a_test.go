@@ -2,6 +2,7 @@ package grab
 
 import (
 	"fmt"
+	"log"
 	"strings"
 	"testing"
 )
@@ -17,15 +18,18 @@ func TestName(t *testing.T) {
 }
 
 func Test1212121(t *testing.T) {
-	split := strings.Split(s, "\n")
-	fmt.Println(len(split))
-	for i, value := range split {
-		if i == 0 {
-			continue
-		}
-		arr := strings.Split(value, " ")
-		fmt.Println(arr[1])
-	}
+	//split := strings.Split(s, "\n")
+	//fmt.Println(len(split))
+	//for i, value := range split {
+	//	if i == 0 {
+	//		continue
+	//	}
+	//	arr := strings.Split(value, " ")
+	//	fmt.Println(arr[1])
+	//}
+
+	log.Println(fmt.Sprintf("%x",29631))
+
 
 }
 
