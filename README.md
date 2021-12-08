@@ -7,14 +7,15 @@
 1. 安装 go
 2. cd cmd; go build
 3. ./main -pid {java pid} -tick 1 -threshold 50 前台运行该程序
-4. 如触发阈值，程序会自动 dump 文件，文件格式：pid + 时间 + .dump
+4. 如触发阈值，程序会自动 dump 文件，文件格式：pid + 时间 + .txt
 
 参数介绍：
 -pid java 进程 id
 -tick 抓取间隔
 -threshold cpu 阈值， 触发阈值则抓取堆栈
 
-
+# 效果
+![](stack.png)
 
 
 # 原理

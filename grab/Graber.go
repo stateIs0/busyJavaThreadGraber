@@ -61,8 +61,8 @@ func dumpThreadStack2File(subThreadList []*SubThread, pid string) {
 
 	split := strings.Split(string(jstackContent), "\n")
 
-	newFile := pid + time.Now().Format(Layout) + ".txt"
-	jstackFile := pid + time.Now().Format(Layout) + ".jstack"
+	newFile := pid + "_" + time.Now().Format(Layout) + ".txt"
+	jstackFile := pid + "_" + time.Now().Format(Layout) + ".jstack"
 	output, err := os.Create(newFile)
 	if err != nil {
 		log.Println(err)
