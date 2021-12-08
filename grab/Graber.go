@@ -11,6 +11,8 @@ import (
 	"time"
 )
 
+var Layout = "2006-01-02 15:04:05"
+
 type Police struct {
 	Pid       string
 	tick      int64
@@ -58,7 +60,15 @@ func getTopJavaThread(pid string) []string {
 func dumpTopThreadStack(treads []string, pid string) {
 	fileName := pid + ".txt"
 	cmd := "jstack -l " + pid + " > " + fileName
-	exec.Command("bash", "-c", cmd)
+	command := exec.Command("bash", "-c", cmd)
+
+	// 可能没权限.
+	combinedOutput, err := command.CombinedOutput()
+	fmt.Println(combinedOutput)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 
 	// 10 进制转成 16 进制 printf '%x\n' $threadId
 	treadList := []string{}

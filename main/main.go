@@ -7,7 +7,6 @@ import (
 	"sync"
 	"time"
 )
-var layout = "2006-01-02 15:04:05"
 
 var Pid string
 var tick int64
@@ -22,14 +21,14 @@ func main() {
 	// wait
 	group := sync.WaitGroup{}
 	group.Add(1)
-	fmt.Println(time.Now().Format(layout) + " grab start and wait...")
+	fmt.Println(time.Now().Format(grab.Layout) + " grab start and wait...")
 	group.Wait()
 }
 
+// -pid 23751 -tick 1 -threshold 800.0
 func parseArgs() {
 	flag.StringVar(&Pid, "pid", "", "java pid")
 	flag.Int64Var(&tick, "tick", 1, "check cpu time tick")
 	flag.Float64Var(&threshold, "threshold", 1.0, "grab cpu threshold")
 	flag.Parse()
 }
-

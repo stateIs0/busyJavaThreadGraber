@@ -1,6 +1,7 @@
 package cpu
 
 import (
+	"awesomeProject1/grab"
 	"fmt"
 	"io/ioutil"
 	"strconv"
@@ -8,8 +9,7 @@ import (
 	"time"
 )
 
-
-func Get()(float64, float64, float64) {
+func Get() (float64, float64, float64) {
 	idle0, total0 := getCPUSample()
 	time.Sleep(3 * time.Second)
 	idle1, total1 := getCPUSample()
@@ -18,8 +18,8 @@ func Get()(float64, float64, float64) {
 	totalTicks := float64(total1 - total0)
 	cpuUsage := 100 * (totalTicks - idleTicks) / totalTicks
 	// usage busy total
-	fmt.Printf("CPU usage is %f%% [busy: %f, total: %f]\n", cpuUsage, totalTicks-idleTicks, totalTicks)
-	return cpuUsage, totalTicks-idleTicks, totalTicks
+	fmt.Printf(time.Now().Format(grab.Layout)+": CPU usage is %f%% [busy: %f, total: %f]\n", cpuUsage, totalTicks-idleTicks, totalTicks)
+	return cpuUsage, totalTicks - idleTicks, totalTicks
 }
 
 func getCPUSample() (idle, total uint64) {
@@ -28,7 +28,7 @@ func getCPUSample() (idle, total uint64) {
 		return
 	}
 	lines := strings.Split(string(contents), "\n")
-	for _, line := range(lines) {
+	for _, line := range lines {
 		fields := strings.Fields(line)
 		if fields[0] == "cpu" {
 			numFields := len(fields)
