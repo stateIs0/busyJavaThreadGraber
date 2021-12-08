@@ -38,7 +38,7 @@ func GetThreads(pid int32, threshold float64) []*SubThread {
 	// 获取所有的子进程
 	//thread := getSubThread(pid)
 	// 获取子进程详情
-	detailSubThread := getThreadDetail2(int(pid), "vale")
+	detailSubThread := getThreadDetail2(strconv.Itoa(pid), "vale")
 	if len(detailSubThread) <= 0 {
 		log.Println("子线程数量为0, 不需要这个工具了.")
 		return nil
@@ -81,7 +81,7 @@ func GetThreads(pid int32, threshold float64) []*SubThread {
 29617 vale      20   0 6697940  91448  12452 S  0.0  0.6   0:00.00 java
 29618 vale      20   0 6697940  91448  12452 S  0.0  0.6   0:00.06 java
 */
-func getThreadDetail2(goPid int, user string) []*SubThread {
+func getThreadDetail2(goPid string, user string) []*SubThread {
 	shell := fmt.Sprintf("(top -n 1 -Hp %s | grep %s | head -10 | sed 's/\\x1b\\x28\\x42\\x1b\\[m//' | sed 's/\\x1b\\[1m//' | sed s/[[:space:]]/\\ /g)", goPid, user)
 	command := exec.Command("bash", "-c", shell)
 
