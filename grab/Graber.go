@@ -4,6 +4,7 @@ import (
 	"awesomeProject1/cpu"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 	"os/exec"
 	"strconv"
@@ -76,7 +77,7 @@ func getTopJavaThread(pid string) []string {
 	cmd := " top -Hp " + pid
 	c := exec.Command("bash", "-c", cmd)
 	output, _ := c.CombinedOutput()
-	fmt.Println(string(output))
+	log.Println("--->>" + string(output))
 	return nil
 }
 
