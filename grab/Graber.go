@@ -58,14 +58,6 @@ func dumpTopThreadStack(thread []SubThread, pid string) {
 		return
 	}
 
-	// 10 进制转成 16 进制 printf '%x\n' $threadId
-	treadIDList := []string{}
-	for _, tread := range thread {
-		itoa := strconv.Itoa(tread.pid)
-		treadIDList = append(treadIDList, itoa)
-		log.Println("threadId = ", itoa, ", CPUPercent = ", tread.CPUPercent)
-	}
-
 	split := strings.Split(string(jstackContent), "\n")
 
 	newFile := pid + time.Now().Format(Layout) + ".dump"
@@ -77,9 +69,9 @@ func dumpTopThreadStack(thread []SubThread, pid string) {
 	jstackFileoutput.Close()
 
 	for _, line := range split {
-		for _, threadNum := range treadIDList {
-			if strings.Contains(line, threadNum) {
-				output.WriteString(line + "\r\n")
+		for _, threadNum := range thread {
+			if strings.Contains(line, threadNum.pid16) {
+				output.WriteString(line + ", CPUPercent= " + strconv.Itoa(int(threadNum.CPUPercent)) + "\r\n")
 			}
 		}
 	}

@@ -1,6 +1,7 @@
 package grab
 
 import (
+	"fmt"
 	"github.com/shirou/gopsutil/process"
 	"log"
 	"os/exec"
@@ -84,6 +85,7 @@ func Handler(output []byte) []SubThread {
 				s := SubThread{
 					pid:        atoi,
 					CPUPercent: percent,
+					pid16: fmt.Sprintf("%x", atoi),
 				}
 				chann <- s
 			}()
@@ -114,11 +116,12 @@ func Handler(output []byte) []SubThread {
 		}
 		return false
 	})
-	log.Println("threads len --->>",threads[0:5])
+	log.Println("threads len --->>", threads[0:5])
 	return threads[0:5]
 }
 
 type SubThread struct {
 	pid        int
+	pid16      string
 	CPUPercent float64
 }
