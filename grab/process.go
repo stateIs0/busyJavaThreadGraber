@@ -93,8 +93,6 @@ func getThreadDetail2(goPid string, user string) []*SubThread {
 
 	subThreads := []*SubThread{}
 	lines := strings.Split(string(row), "\n")
-	log.Println(lines)
-	log.Println(len(lines))
 	for _, line := range lines {
 		fields := strings.Fields(line)
 		if len(fields) < 1 {
@@ -218,4 +216,9 @@ type SubThread struct {
 	pid16            string
 	parentCPUPercent float64
 	CPUPercent       float64
+}
+
+func (s *SubThread) String() string  {
+	return fmt.Sprintf("pid %d, pid16 %s, parentCPUPercent %f, CPUPercent %f ",
+		s.pid, s.pid16, s.parentCPUPercent, s.CPUPercent)
 }
