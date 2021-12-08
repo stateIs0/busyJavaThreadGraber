@@ -54,7 +54,7 @@ func GetThreads(pid int32, threshold float64) []string {
 		return nil
 	}
 	threads := []string{}
-	var count
+	var count = 0
 	if len(string(output)) > 0 {
 
 		str := string(output)
