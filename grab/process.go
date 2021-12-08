@@ -69,7 +69,9 @@ func GetThreads(pid int32, threshold float64) []string {
 				continue
 			}
 			lineArr := strings.Split(line, " ")
-
+			if len(lineArr) < 2 {
+				continue
+			}
 			subThread := lineArr[1]
 			log.Println("subThread --->>", subThread)
 			atoi, err := strconv.Atoi(subThread)
@@ -79,7 +81,7 @@ func GetThreads(pid int32, threshold float64) []string {
 
 			go func() {
 				subPro, _ := process.NewProcess(int32(atoi))
-				percent, _ := subPro.CPUPercent()
+				percent, _ := subPro.Percent(3 * time.Second)
 				s := SubThread{
 					pid:        subThread,
 					CPUPercent: percent,
