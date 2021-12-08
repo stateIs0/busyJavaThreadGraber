@@ -97,7 +97,7 @@ func getThreadDetail2(goPid string, user string) []*SubThread {
 	log.Println(len(lines))
 	for _, line := range lines {
 		fields := strings.Fields(line)
-		arr := strings.Split(line, " ")
+		log.Println("fields ", fields)
 		atoi, err := strconv.Atoi(fields[0])
 		if err != nil {
 			log.Println("atoi ", atoi)
@@ -110,7 +110,7 @@ func getThreadDetail2(goPid string, user string) []*SubThread {
 		}
 		sub := &SubThread{
 			pid:        atoi,
-			pid16:      fmt.Sprintf("%x", arr[0]),
+			pid16:      fmt.Sprintf("%x", fields[0]),
 			CPUPercent: float,
 		}
 		subThreads = append(subThreads, sub)
