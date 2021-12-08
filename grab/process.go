@@ -12,38 +12,60 @@ import (
 	"time"
 )
 
-func GetThreads(pid int32, threshold float64) []SubThread {
-
-	newProcess, err := process.NewProcess(pid)
+func getParentThreadState(pid1 int32, channle chan float64) {
+	newProcess, err := process.NewProcess(pid1)
 	if err != nil {
-		return nil
+		return
 	}
 
 	parentCPUPercent, err := newProcess.Percent(3 * time.Second)
 	if err != nil {
 		log.Println(err)
-		return nil
-	}
-	name, err := newProcess.Name()
-	if err != nil {
-		return nil
-	}
-	log.Println("pid ", name, " rootProcess parentCPUPercent = ", parentCPUPercent, ", threshold=", threshold)
-	if parentCPUPercent == 0 {
-		return nil
+		return
 	}
 
+	if parentCPUPercent == 0 {
+		return
+	}
+	channle <- parentCPUPercent
+}
+
+func GetThreads(pid int32, threshold float64) []SubThread {
+
+	getParentThreadStateResult := make(chan float64)
+	// 获取进程的状态
+	go func() { getParentThreadState(pid, getParentThreadStateResult) }()
+	// 获取所有的子进程
 	thread := getSubThread(pid)
-	detailSubThread := getThreadDetail(thread, parentCPUPercent)
+	// 获取子进程详情
+	detailSubThread := getThreadDetail(thread)
+
+	var parentCPUPercent = 0.0
+
+	select {
+	// 等待结果
+	case data := <-getParentThreadStateResult:
+		parentCPUPercent = data
+	// 超时 5s
+	case <-time.After(5 * time.Second):
+		break
+	}
+
+	log.Println("pid ", pid, " rootProcess parentCPUPercent = ", parentCPUPercent, ", threshold=", threshold)
 
 	if parentCPUPercent < threshold {
 		return nil
 	}
+
+	for _, subThread := range detailSubThread {
+		subThread.parentCPUPercent = parentCPUPercent
+	}
+
 	log.Println("threads len --->>", detailSubThread)
 	return detailSubThread
 }
 
-func getThreadDetail(threads []int, parentCPUPercent float64) []SubThread{
+func getThreadDetail(threads []int) []SubThread {
 	subThreads := []SubThread{}
 	stop := make(chan string)
 	wg := sync.WaitGroup{}
@@ -72,10 +94,9 @@ func getThreadDetail(threads []int, parentCPUPercent float64) []SubThread{
 			subPro, _ := process.NewProcess(int32(pdi))
 			percent, _ := subPro.Percent(2 * time.Second)
 			s := SubThread{
-				pid:              pdi,
-				CPUPercent:       percent,
-				pid16:            fmt.Sprintf("%x", pdi),
-				parentCPUPercent: parentCPUPercent,
+				pid:        pdi,
+				CPUPercent: percent,
+				pid16:      fmt.Sprintf("%x", pdi),
 			}
 			chann <- s
 		}()
