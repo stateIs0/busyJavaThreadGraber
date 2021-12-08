@@ -46,7 +46,14 @@ func (p *Police) parseThreadContentAndDump() {
 	if thread == nil || len(thread) == 0 {
 		return
 	}
-	dumpTopThreadStack(thread, strconv.Itoa(int(p.Pid)))
+	arr := []string{
+		thread[0].pid,
+		thread[1].pid,
+		thread[2].pid,
+		thread[3].pid,
+		thread[4].pid,
+	}
+	dumpTopThreadStack(arr, strconv.Itoa(int(p.Pid)))
 }
 
 func dumpTopThreadStack(treads []string, pid string) {
@@ -84,7 +91,6 @@ func dumpTopThreadStack(treads []string, pid string) {
 
 	split := strings.Split(string(content), "\r\n")
 
-
 	newFile := pid + time.Now().Format(Layout) + ".dump"
 	output, _ := os.Create(newFile)
 
@@ -96,6 +102,6 @@ func dumpTopThreadStack(treads []string, pid string) {
 		}
 	}
 
-	log.Println("dump 成功, file ",newFile )
+	log.Println("dump 成功, file ", newFile)
 
 }

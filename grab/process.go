@@ -4,13 +4,14 @@ import (
 	"github.com/shirou/gopsutil/process"
 	"log"
 	"os/exec"
+	"sort"
 	"strconv"
 	"strings"
 	"sync"
 	"time"
 )
 
-func GetThreads(pid int32, threshold float64) []string {
+func GetThreads(pid int32, threshold float64) []SubThread {
 
 	newProcess, err := process.NewProcess(pid)
 	if err != nil {
@@ -48,7 +49,12 @@ func GetThreads(pid int32, threshold float64) []string {
 		log.Println(err)
 		return nil
 	}
-	threads := []string{}
+	return Handler(output)
+
+}
+
+func Handler(output []byte) []SubThread {
+	threads := []SubThread{}
 	wg := sync.WaitGroup{}
 	stop := make(chan string)
 	if len(string(output)) > 0 {
@@ -89,8 +95,8 @@ func GetThreads(pid int32, threshold float64) []string {
 				case data, ok := <-chann:
 					wg.Done()
 					if ok {
-						if data.CPUPercent > 10 {
-							threads = append(threads, data.pid)
+						if data.CPUPercent >= 0 {
+							threads = append(threads, data)
 						}
 					}
 				case <-stop:
@@ -102,9 +108,14 @@ func GetThreads(pid int32, threshold float64) []string {
 	}
 	wg.Wait()
 	stop <- ""
-	log.Println("threads len --->>", len(threads))
-	return threads
-
+	sort.SliceStable(threads, func(i, j int) bool {
+		if threads[i].CPUPercent > threads[j].CPUPercent {
+			return true
+		}
+		return false
+	})
+	log.Println("threads len --->>",threads[0:5])
+	return threads[0:5]
 }
 
 type SubThread struct {
