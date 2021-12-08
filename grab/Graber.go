@@ -17,13 +17,15 @@ type Police struct {
 	Pid       string
 	tick      int64
 	threshold float64
+	sleep     int
 }
 
-func NewPolice(Pid string, tick int64, threshold float64) *Police {
+func NewPolice(Pid string, tick int64, threshold float64, sleep int) *Police {
 	return &Police{
 		Pid:       Pid,
 		tick:      tick,
 		threshold: threshold,
+		sleep:     sleep,
 	}
 }
 
@@ -35,7 +37,7 @@ func (p *Police) Start() {
 			}
 			time.Sleep(time.Duration(p.tick) * time.Second)
 			// 监听 CPU, CPU 触发指标时, 就根据 top 获取 thread, 并抓取堆栈
-			_, f, _ := cpu.Get(p.Pid)
+			_, f, _ := cpu.Get(p.Pid, p.sleep)
 			// 触发
 			if f > p.threshold {
 				p.parseThreadContentAndDump()
