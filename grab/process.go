@@ -38,7 +38,7 @@ func GetThreads(pid int32, threshold float64) []*SubThread {
 	// 获取所有的子进程
 	//thread := getSubThread(pid)
 	// 获取子进程详情
-	detailSubThread := getThreadDetail2(strconv.Itoa(pid), "vale")
+	detailSubThread := getThreadDetail2(strconv.Itoa(int(pid)), "vale")
 	if len(detailSubThread) <= 0 {
 		log.Println("子线程数量为0, 不需要这个工具了.")
 		return nil
