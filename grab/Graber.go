@@ -55,7 +55,7 @@ func dumpTopThreadStack(subThreadList []*SubThread, pid string) {
 	// 可能没权限.
 	jstackContent, err := command.CombinedOutput()
 	if err != nil {
-		log.Println(err)
+		log.Println("jstack error >>>>>>", err)
 		return
 	}
 
