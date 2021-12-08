@@ -1,6 +1,7 @@
 package grab
 
 import (
+	"awesomeProject1/cpu"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -35,25 +36,31 @@ func (p *Police) Start() {
 				p.tick = 1
 			}
 			time.Sleep(time.Duration(p.tick) * time.Second)
-			// 监听 CPU, CPU 触发指标时, 就根据 top 获取 thread, 并抓取堆栈
-			//cmd := " top -Hp " + pid
-			shell := "../getCpu.sh"
-			c := exec.Command(shell, "vale", p.Pid)
-			err := c.Start() //运行脚本
-			if nil != err {
-				fmt.Println(err)
-			}
-			if c.Process == nil {
-				fmt.Println("Process PID is nil, golang exit....")
+			//// 监听 CPU, CPU 触发指标时, 就根据 top 获取 thread, 并抓取堆栈
+			////cmd := " top -Hp " + pid
+			//shell := "../getCpu.sh"
+			//c := exec.Command(shell, "vale", p.Pid)
+			//err := c.Start() //运行脚本
+			//if nil != err {
+			//	fmt.Println(err)
+			//}
+			//if c.Process == nil {
+			//	fmt.Println("Process PID is nil, golang exit....")
+			//	return
+			//}
+			//fmt.Println("Process PID:", c.Process.Pid)
+			//err = c.Wait() //等待执行完成
+			//
+			//output, _ := c.CombinedOutput()
+			//f, _ := strconv.Atoi(string(output))
+			atoi, err := strconv.Atoi(p.Pid)
+			if err != nil {
 				return
 			}
-			fmt.Println("Process PID:", c.Process.Pid)
-			err = c.Wait() //等待执行完成
+			f := cpu.Get2(atoi)
 
-			output, _ := c.CombinedOutput()
-			f, _ := strconv.Atoi(string(output))
 			// 触发
-			if f > p.threshold {
+			if int(f) > p.threshold {
 				p.parseThreadContentAndDump()
 			}
 		}

@@ -1,8 +1,11 @@
 package cpu
 
 import (
+	"bytes"
 	"fmt"
 	"io/ioutil"
+	"log"
+	"os/exec"
 	"strconv"
 	"strings"
 	"time"
@@ -10,6 +13,12 @@ import (
 
 var Layout = "2006-01-02 15:04:05"
 
+//在proc文件系统中，可以通过/proc/[pid]/stat获得进程消耗的时间片，
+//输出的第14、15、16、17列分别对应进程用户态CPU消耗、内核态的消耗、
+//用户态等待子进程的消耗、内核态等待子进程的消耗(man proc)。
+//所以进程的CPU消耗可以使用如下命令：
+//cat /proc/9583/stat|awk '{print "cpu_process_total_slice " $14+$15+$16+$17}'
+//cpu_process_total_slice 1068099
 func Get(pid string, sleep int) (float64, float64, float64) {
 	idle0, total0 := getCPUSample(pid)
 	time.Sleep(time.Duration(sleep) * time.Second)
@@ -21,6 +30,52 @@ func Get(pid string, sleep int) (float64, float64, float64) {
 	// usage busy total
 	fmt.Printf(time.Now().Format(Layout)+": CPU usage is %f%% [busy: %f, total: %f]\n", cpuUsage, totalTicks-idleTicks, totalTicks)
 	return cpuUsage, totalTicks - idleTicks, totalTicks
+}
+
+func Get2(pid int) float64 {
+	cmd := exec.Command("ps", "aux")
+	var out bytes.Buffer
+	cmd.Stdout = &out
+	err := cmd.Run()
+	if err != nil {
+		log.Fatal(err)
+	}
+	processes := make([]*Process, 0)
+	for {
+		line, err := out.ReadString('\n')
+		if err != nil {
+			break
+		}
+		tokens := strings.Split(line, " ")
+		ft := make([]string, 0)
+		for _, t := range tokens {
+			if t != "" && t != "\t" {
+				ft = append(ft, t)
+			}
+		}
+		log.Println(len(ft), ft)
+		pid, err := strconv.Atoi(ft[1])
+		if err != nil {
+			continue
+		}
+		cpu, err := strconv.ParseFloat(ft[2], 64)
+		if err != nil {
+			log.Fatal(err)
+		}
+		processes = append(processes, &Process{pid, cpu})
+	}
+	for _, p := range processes {
+		log.Println("Process ", p.pid, " takes ", p.cpu, " % of the CPU")
+		if p.pid == pid {
+			return p.cpu
+		}
+	}
+	return 0
+}
+
+type Process struct {
+	pid int
+	cpu float64
 }
 
 func getCPUSample(pid string) (idle, total uint64) {
