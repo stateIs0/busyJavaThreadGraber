@@ -77,7 +77,7 @@ func getTopJavaThread(pid string) []string {
 	cmd := " top -Hp " + pid
 	c := exec.Command("bash", "-c", cmd)
 	output, _ := c.CombinedOutput()
-	log.Println("--->>" + string(output))
+	log.Println("--->>" + pid + string(output))
 	return nil
 }
 
