@@ -61,6 +61,7 @@ func (p *Police) Start() {
 			f := cpu.Get2(atoi)
 
 			// 触发
+			log.Println("f = ", int(f))
 			if int(f) > p.threshold {
 				p.parseThreadContentAndDump()
 			}
