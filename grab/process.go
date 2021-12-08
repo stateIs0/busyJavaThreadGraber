@@ -19,20 +19,20 @@ func GetThreads(pid int32, threshold float64) []string {
 
 	percent, err := rootProcess.CPUPercent()
 
-	log.Println(pid, " rootProcess CPUPercent = ", percent*100, ", threshold=", threshold)
+	log.Println("pid ", pid, " rootProcess CPUPercent = ", percent, ", threshold=", threshold)
 
 	if err != nil {
 		log.Println(err)
 		return nil
 	}
 
-	if percent*100 < threshold {
+	if percent < threshold {
 		return nil
 	}
 
 	threads := []string{}
 
-	if percent*100 > threshold {
+	if percent > threshold {
 		children, _ := rootProcess.Children()
 		fmt.Println("children:", children)
 		for _, p := range children {
