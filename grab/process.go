@@ -9,17 +9,12 @@ import (
 	"time"
 )
 
-var newProcess *process.Process
 
 func GetThreads(pid int32, threshold float64) []string {
 
-	if newProcess == nil {
-		log.Println("pid ", pid)
-		ss, err := process.NewProcess(pid)
-		if err != nil {
-			return nil
-		}
-		newProcess = ss
+	newProcess, err := process.NewProcess(pid)
+	if err != nil {
+		return nil
 	}
 
 	percent, err := newProcess.Percent(3 * time.Second)
