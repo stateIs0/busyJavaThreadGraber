@@ -7,7 +7,7 @@ import (
 	"strconv"
 )
 
-func GetThreads(pid int32, a float64) []string {
+func GetThreads(pid int32, threshold float64) []string {
 	var rootProcess *process.Process
 	processes, _ := process.Processes()
 	for _, p := range processes {
@@ -19,22 +19,22 @@ func GetThreads(pid int32, a float64) []string {
 
 	percent, err := rootProcess.CPUPercent()
 
-	log.Println("rootProcess CPUPercent = ", percent)
+	log.Println(pid, " rootProcess CPUPercent = ", percent*100, ", threshold=", threshold)
 
 	if err != nil {
 		log.Println(err)
 		return nil
 	}
 
-	if percent < a {
+	if percent*100 < threshold {
 		return nil
 	}
 
 	threads := []string{}
 
-	if percent > a {
-		fmt.Println("children:")
+	if percent*100 > threshold {
 		children, _ := rootProcess.Children()
+		fmt.Println("children:", children)
 		for _, p := range children {
 			cpuPercent, err := p.CPUPercent()
 			if err != nil {

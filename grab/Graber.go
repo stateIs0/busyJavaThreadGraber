@@ -43,7 +43,7 @@ func (p *Police) Start() {
 
 func (p *Police) parseThreadContentAndDump() {
 	thread := GetThreads(p.Pid, float64(p.threshold))
-	if thread == nil {
+	if thread == nil || len(thread) == 0 {
 		return
 	}
 	dumpTopThreadStack(thread, strconv.Itoa(int(p.Pid)))
