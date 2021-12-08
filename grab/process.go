@@ -93,7 +93,6 @@ func GetThreads(pid int32, threshold float64) []string {
 			case data, ok := <-chann:
 				if ok {
 					if data.CPUPercent > 10 {
-						log.Println("sub cost ", data)
 						threads = append(threads, data.pid)
 					}
 				}
