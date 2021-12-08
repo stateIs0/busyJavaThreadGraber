@@ -22,7 +22,7 @@ func GetThreads(pid int32, threshold float64) []string {
 		return nil
 	}
 
-	log.Println("pid ", pid, " rootProcess CPUPercent = ", percent, ", threshold=", threshold)
+	log.Println("pid ", pid, " rootProcess percent = ", percent, ", threshold=", threshold)
 	if percent == 0 {
 		return nil
 	}
@@ -36,10 +36,7 @@ func GetThreads(pid int32, threshold float64) []string {
 		return nil
 	}
 
-	if percent < threshold {
-		return nil
-	}
-	cmd := "ps -T -p" + strconv.Itoa(int(pid))
+	cmd := "ps -T -p " + strconv.Itoa(int(pid))
 	c := exec.Command("bash", "-c", cmd)
 
 	output, err := c.CombinedOutput()
