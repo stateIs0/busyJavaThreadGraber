@@ -89,7 +89,10 @@ func getThreadDetail2(goPid string, user string) []*SubThread {
 	row, err := command.CombinedOutput()
 	if err != nil {
 		log.Println("top fail ", err, ", shell =", shell)
+	} else {
+		log.Println("top success ", err, ", shell =", shell)
 	}
+
 	subThreads := []*SubThread{}
 	log.Println(row)
 	lines := strings.Split(string(row), "\n")
