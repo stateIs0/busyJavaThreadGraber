@@ -3,7 +3,6 @@ package grab
 import (
 	"fmt"
 	"io/ioutil"
-	"log"
 	"os"
 	"os/exec"
 	"strconv"
@@ -47,14 +46,6 @@ func (p *Police) parseThreadContentAndDump() {
 		return
 	}
 	dumpTopThreadStack(thread, strconv.Itoa(int(p.Pid)))
-}
-
-func getTopJavaThread(pid string) []string {
-	cmd := " top -Hp " + pid
-	c := exec.Command("bash", "-c", cmd)
-	output, _ := c.CombinedOutput()
-	log.Println("--->>" + pid + string(output))
-	return nil
 }
 
 func dumpTopThreadStack(treads []string, pid string) {

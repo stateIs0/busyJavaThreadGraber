@@ -48,7 +48,7 @@ func GetThreads(pid int32, threshold float64) []string {
 		return nil
 	}
 	threads := []string{}
-	log.Println("--->>" + strconv.Itoa(int(pid)) + string(output))
+	log.Println("len --->>" + strconv.Itoa(len(output)))
 	if len(string(output)) > 0 {
 
 		str := string(output)
