@@ -54,13 +54,11 @@ func GetThreads(pid int32, threshold float64) []string {
 		return nil
 	}
 	threads := []string{}
-	log.Println("len --->>" + strconv.Itoa(len(output)))
+	var count
 	if len(string(output)) > 0 {
 
 		str := string(output)
 		split := strings.Split(str, "\n")
-
-		log.Println("split len --->>", len(split))
 
 		chann := make(chan SubThread, len(split)-1)
 
@@ -73,12 +71,11 @@ func GetThreads(pid int32, threshold float64) []string {
 				continue
 			}
 			subThread := lineArr[1]
-			log.Println("subThread --->>", subThread)
 			atoi, err := strconv.Atoi(subThread)
 			if err != nil {
 				continue
 			}
-
+			count += 1
 			go func() {
 				subPro, _ := process.NewProcess(int32(atoi))
 				percent, _ := subPro.Percent(3 * time.Second)
@@ -101,7 +98,7 @@ func GetThreads(pid int32, threshold float64) []string {
 					}
 				}
 			default:
-				if len(threads) >= len(split)-1 {
+				if len(threads) >= count {
 					log.Println("threads len --->> 2 " + strconv.Itoa(len(threads)))
 					return threads
 				}
