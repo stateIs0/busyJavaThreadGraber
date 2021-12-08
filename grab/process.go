@@ -82,7 +82,7 @@ func Handler(output []byte) []SubThread {
 				subPro, _ := process.NewProcess(int32(atoi))
 				percent, _ := subPro.Percent(3 * time.Second)
 				s := SubThread{
-					pid:        subThread,
+					pid:        atoi,
 					CPUPercent: percent,
 				}
 				chann <- s
@@ -95,7 +95,7 @@ func Handler(output []byte) []SubThread {
 				case data, ok := <-chann:
 					wg.Done()
 					if ok {
-						if data.CPUPercent >= 0 {
+						if data.CPUPercent >= 50 {
 							threads = append(threads, data)
 						}
 					}
@@ -119,6 +119,6 @@ func Handler(output []byte) []SubThread {
 }
 
 type SubThread struct {
-	pid        string
+	pid        int
 	CPUPercent float64
 }

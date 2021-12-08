@@ -1,7 +1,6 @@
 package grab
 
 import (
-	"fmt"
 	"log"
 	"os"
 	"os/exec"
@@ -45,47 +44,40 @@ func (p *Police) parseThreadContentAndDump() {
 	if thread == nil || len(thread) == 0 {
 		return
 	}
-	arr := []string{
-		thread[0].pid,
-		thread[1].pid,
-		thread[2].pid,
-		thread[3].pid,
-		thread[4].pid,
-	}
-	dumpTopThreadStack(arr, strconv.Itoa(int(p.Pid)))
+	dumpTopThreadStack(thread, strconv.Itoa(int(p.Pid)))
 }
 
-func dumpTopThreadStack(treads []string, pid string) {
+func dumpTopThreadStack(thread []SubThread, pid string) {
 	cmd := "jstack -l " + pid
 	command := exec.Command("bash", "-c", cmd)
 
 	// 可能没权限.
 	jstackContent, err := command.CombinedOutput()
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return
 	}
 
 	// 10 进制转成 16 进制 printf '%x\n' $threadId
-	treadList := []string{}
-	for _, tread := range treads {
-		atto, err := strconv.Atoi(tread)
-		if err != nil {
-			return
-		}
-		formatInt := strconv.FormatInt(int64(atto), 16)
-		treadList = append(treadList, formatInt)
+	treadIDList := []string{}
+	for _, tread := range thread {
+		itoa := strconv.Itoa(tread.pid)
+		treadIDList = append(treadIDList, itoa)
+		log.Println("threadId = ", itoa, ", CPUPercent = ", tread.CPUPercent)
 	}
-
-	log.Println("treadList, ",treadList)
 
 	split := strings.Split(string(jstackContent), "\n")
 
 	newFile := pid + time.Now().Format(Layout) + ".dump"
+	jstackFile := pid + time.Now().Format(Layout) + ".jstack"
 	output, _ := os.Create(newFile)
+	jstackFileoutput, _ := os.Create(jstackFile)
+
+	jstackFileoutput.Write(jstackContent)
+	jstackFileoutput.Close()
 
 	for _, line := range split {
-		for _, threadNum := range treadList {
+		for _, threadNum := range treadIDList {
 			if strings.Contains(line, threadNum) {
 				output.WriteString(line + "\r\n")
 			}
