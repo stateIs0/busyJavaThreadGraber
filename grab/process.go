@@ -102,7 +102,7 @@ func GetThreads(pid int32, threshold float64) []string {
 	}
 	wg.Wait()
 	stop <- ""
-	log.Println("threads len --->>" + strconv.Itoa(len(threads)))
+	log.Println("threads len --->>", len(threads))
 	return threads
 
 }
