@@ -68,7 +68,7 @@ func GetThreads(pid int32, threshold float64) []string {
 			threads = append(threads, subThread)
 		}
 	}
-
+	log.Println("threads len --->>" + strconv.Itoa(len(threads)))
 	return threads
 
 }
