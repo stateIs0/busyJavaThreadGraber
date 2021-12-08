@@ -110,8 +110,11 @@ func getThreadDetail(threads []int) []*SubThread {
 		}
 		return false
 	})
-
-	return subThreads[0:10]
+	if len(subThreads) >= 0 {
+		return subThreads[0:10]
+	}else {
+		return subThreads[0:]
+	}
 }
 
 func getSubThread(pid int32) []int {

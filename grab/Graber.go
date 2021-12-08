@@ -18,12 +18,11 @@ type Police struct {
 	sleep     int
 }
 
-func NewPolice(Pid int32, tick int64, threshold int, sleep int) *Police {
+func NewPolice(Pid int32, tick int64, threshold int) *Police {
 	return &Police{
 		Pid:       Pid,
 		tick:      tick,
 		threshold: threshold,
-		sleep:     sleep,
 	}
 }
 
