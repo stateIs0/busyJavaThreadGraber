@@ -10,7 +10,7 @@ import (
 
 var Pid string
 var tick int64
-var threshold float64
+var threshold int
 var sleep int
 
 var Layout = "2006-01-02 15:04:05"
@@ -28,11 +28,11 @@ func main() {
 	group.Wait()
 }
 
-// -pid 23751 -tick 1 -threshold 800.0 -sleep 2
+// ./main -pid 23751 -tick 1 -threshold 800.0 -sleep 2
 func parseArgs() {
 	flag.StringVar(&Pid, "pid", "", "java pid")
 	flag.Int64Var(&tick, "tick", 1, "check cpu time tick")
-	flag.Float64Var(&threshold, "threshold", 1.0, "grab cpu threshold")
+	flag.IntVar(&threshold, "threshold", 1, "grab cpu threshold")
 	flag.IntVar(&sleep, "sleep", 3, "garb cpu sleep")
 	flag.Parse()
 }

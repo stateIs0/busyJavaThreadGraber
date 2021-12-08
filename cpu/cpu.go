@@ -28,10 +28,10 @@ func getCPUSample(pid string) (idle, total uint64) {
 	if err != nil {
 		return
 	}
-	lines := strings.Split(string(contents), "\n")
+	lines := strings.Split(string(contents), " ")
 	for _, line := range lines {
 		fields := strings.Fields(line)
-		if fields[0] == "cpu" {
+		if fields[14] == "cpu" {
 			numFields := len(fields)
 			for i := 1; i < numFields; i++ {
 				val, err := strconv.ParseUint(fields[i], 10, 64)

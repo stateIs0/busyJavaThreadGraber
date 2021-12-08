@@ -1,7 +1,6 @@
 package grab
 
 import (
-	"awesomeProject1/cpu"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -16,11 +15,11 @@ var Layout = "2006-01-02 15:04:05"
 type Police struct {
 	Pid       string
 	tick      int64
-	threshold float64
+	threshold int
 	sleep     int
 }
 
-func NewPolice(Pid string, tick int64, threshold float64, sleep int) *Police {
+func NewPolice(Pid string, tick int64, threshold int, sleep int) *Police {
 	return &Police{
 		Pid:       Pid,
 		tick:      tick,
@@ -37,7 +36,18 @@ func (p *Police) Start() {
 			}
 			time.Sleep(time.Duration(p.tick) * time.Second)
 			// 监听 CPU, CPU 触发指标时, 就根据 top 获取 thread, 并抓取堆栈
-			_, f, _ := cpu.Get(p.Pid, p.sleep)
+			//cmd := " top -Hp " + pid
+			shell := "../getCpu.sh"
+			c := exec.Command(shell, "vale", p.Pid)
+			err := c.Start() //运行脚本
+			if nil != err {
+				fmt.Println(err)
+			}
+			fmt.Println("Process PID:", c.Process.Pid)
+			err = c.Wait() //等待执行完成
+
+			output, _ := c.CombinedOutput()
+			f, _ := strconv.Atoi(string(output))
 			// 触发
 			if f > p.threshold {
 				p.parseThreadContentAndDump()
