@@ -40,7 +40,12 @@ func GetThreads(pid int32, threshold float64) []string {
 		return nil
 	}
 	cmd := "ps -T -p" + strconv.Itoa(int(pid))
-	c := exec.Command("bash ", "-c", cmd)
+	c := exec.Command("bash", "-c", cmd)
+	e := c.Run()
+	if e != nil {
+		log.Println(e)
+		return nil
+	}
 	output, _ := c.CombinedOutput()
 	log.Println("--->>" + strconv.Itoa(int(pid)) + string(output))
 
