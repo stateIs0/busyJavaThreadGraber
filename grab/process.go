@@ -39,7 +39,7 @@ func GetThreads(pid int32, threshold float64) []SubThread {
 	if parentCPUPercent < threshold {
 		return nil
 	}
-
+	log.Println("threads len --->>", detailSubThread)
 	return detailSubThread
 }
 
@@ -88,7 +88,7 @@ func getThreadDetail(threads []int, parentCPUPercent float64) []SubThread{
 		}
 		return false
 	})
-	log.Println("threads len --->>", subThreads[0:10])
+
 	return subThreads[0:10]
 }
 
