@@ -69,11 +69,12 @@ func GetThreads(pid int32, threshold float64) []string {
 				continue
 			}
 			lineArr := strings.Split(line, " ")
-			log.Println("lineArr len --->>", len(lineArr))
+
 			subThread := lineArr[1]
+			log.Println("subThread --->>", subThread)
 			atoi, err := strconv.Atoi(subThread)
 			if err != nil {
-				return nil
+				continue
 			}
 
 			go func() {
