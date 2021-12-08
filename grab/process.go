@@ -32,8 +32,8 @@ func GetThreads(pid int32, threshold float64) []string {
 	if percent < threshold {
 		return nil
 	}
-
-	c := exec.Command("ps ", "-T -p "+ strconv.Itoa(int(pid)))
+	cmd := "ps -T -p" + strconv.Itoa(int(pid))
+	c := exec.Command("bash ", cmd)
 	output, _ := c.CombinedOutput()
 	log.Println("--->>" + strconv.Itoa(int(pid)) + string(output))
 
