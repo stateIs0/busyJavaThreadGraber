@@ -39,6 +39,10 @@ func GetThreads(pid int32, threshold float64) []*SubThread {
 	thread := getSubThread(pid)
 	// 获取子进程详情
 	detailSubThread := getThreadDetail(thread)
+	if len(detailSubThread) <= 0 {
+		log.Println("子线程数量为0, 不需要这个工具了.")
+		return nil
+	}
 
 	var parentCPUPercent = 0.0
 
