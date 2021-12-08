@@ -97,7 +97,7 @@ func Handler(output []byte) []SubThread {
 				case data, ok := <-chann:
 					wg.Done()
 					if ok {
-						if data.CPUPercent >= 50 {
+						if data.CPUPercent >= 0 {
 							threads = append(threads, data)
 						}
 					}
@@ -116,8 +116,8 @@ func Handler(output []byte) []SubThread {
 		}
 		return false
 	})
-	log.Println("threads len --->>", threads[0:5])
-	return threads[0:5]
+	log.Println("threads len --->>", threads[0:10])
+	return threads[0:10]
 }
 
 type SubThread struct {
