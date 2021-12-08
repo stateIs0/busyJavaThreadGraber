@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-var Layout = "2006-01-02 15:04:05"
+var Layout = "2006-01-02_15:04:05"
 
 type Police struct {
 	Pid       int32
@@ -49,7 +49,8 @@ func (p *Police) parseThreadContentAndDump() {
 }
 
 func dumpTopThreadStack(treads []string, pid string) {
-	fileName := pid + "_" + time.Now().String() + ".txt"
+	fileName := pid + "_" + time.Now().Format(Layout) + ".txt"
+	os.Create(fileName)
 	cmd := "jstack -l " + pid + " > " + fileName
 	command := exec.Command("bash", "-c", cmd)
 
@@ -82,7 +83,8 @@ func dumpTopThreadStack(treads []string, pid string) {
 
 	split := strings.Split(string(content), "\r\n")
 
-	output, _ := os.Open(pid + time.Now().String() + ".dump")
+
+	output, _ := os.Create(pid + time.Now().Format(Layout) + ".dump")
 
 	for _, line := range split {
 		for _, threadNum := range treadList {
