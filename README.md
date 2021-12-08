@@ -1,5 +1,7 @@
 # BusyJavaThreadGraber
-抓取最繁忙的 N 个 Java 线程。
+抓取最繁忙的 N 个 Java 线程，快速排查 java 程序的 cpu 问题，看看是哪个线程在作妖。
+
+
 
 # 使用
 1. 安装 go
