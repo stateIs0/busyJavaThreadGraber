@@ -24,7 +24,7 @@ func Test1212121(t *testing.T) {
 			continue
 		}
 		arr := strings.Split(value, " ")
-		fmt.Println(arr[0])
+		fmt.Println(arr[1])
 	}
 }
 
