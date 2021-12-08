@@ -101,10 +101,12 @@ func getThreadDetail2(goPid string, user string) []*SubThread {
 		arr := strings.Split(line, " ")
 		atoi, err := strconv.Atoi(arr[0])
 		if err != nil {
+			log.Println("atoi ", atoi)
 			return nil
 		}
 		float, err := strconv.ParseFloat(arr[8], 32)
 		if err != nil {
+			log.Println("float ", float)
 			return nil
 		}
 		sub := &SubThread{
