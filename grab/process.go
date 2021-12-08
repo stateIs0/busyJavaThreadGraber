@@ -19,7 +19,7 @@ func GetThreads(pid int32, threshold float64) []SubThread {
 		return nil
 	}
 
-	percent, err := newProcess.Percent(3 * time.Second)
+	parentCPUPercent, err := newProcess.Percent(3 * time.Second)
 	if err != nil {
 		log.Println(err)
 		return nil
@@ -28,8 +28,8 @@ func GetThreads(pid int32, threshold float64) []SubThread {
 	if err != nil {
 		return nil
 	}
-	log.Println("pid ", name, " rootProcess percent = ", percent, ", threshold=", threshold)
-	if percent == 0 {
+	log.Println("pid ", name, " rootProcess parentCPUPercent = ", parentCPUPercent, ", threshold=", threshold)
+	if parentCPUPercent == 0 {
 		return nil
 	}
 
@@ -38,7 +38,7 @@ func GetThreads(pid int32, threshold float64) []SubThread {
 		return nil
 	}
 
-	if percent < threshold {
+	if parentCPUPercent < threshold {
 		return nil
 	}
 
@@ -50,11 +50,11 @@ func GetThreads(pid int32, threshold float64) []SubThread {
 		log.Println(err)
 		return nil
 	}
-	return Handler(output)
+	return Handler(output, parentCPUPercent)
 
 }
 
-func Handler(output []byte) []SubThread {
+func Handler(output []byte, parentCPUPercent float64) []SubThread {
 	threads := []SubThread{}
 	wg := sync.WaitGroup{}
 	stop := make(chan string)
@@ -86,6 +86,7 @@ func Handler(output []byte) []SubThread {
 					pid:        atoi,
 					CPUPercent: percent,
 					pid16: fmt.Sprintf("%x", atoi),
+					parentCPUPercent: parentCPUPercent,
 				}
 				chann <- s
 			}()
@@ -123,5 +124,6 @@ func Handler(output []byte) []SubThread {
 type SubThread struct {
 	pid        int
 	pid16      string
+	parentCPUPercent float64
 	CPUPercent float64
 }
