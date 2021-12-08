@@ -97,7 +97,9 @@ func getThreadDetail2(goPid string, user string) []*SubThread {
 	log.Println(len(lines))
 	for _, line := range lines {
 		fields := strings.Fields(line)
-		log.Println("fields ", fields)
+		if len(fields) < 1 {
+			continue
+		}
 		atoi, err := strconv.Atoi(fields[0])
 		if err != nil {
 			log.Println("atoi ", atoi)
