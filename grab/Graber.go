@@ -68,11 +68,14 @@ func dumpTopThreadStack(thread []SubThread, pid string) {
 	jstackFileoutput.Write(jstackContent)
 	jstackFileoutput.Close()
 
-	for _, line := range split {
+	for idx, line := range split {
 		for _, threadNum := range thread {
 			if strings.Contains(line, threadNum.pid16) {
-				output.WriteString(line + ", CPUPercent= " + strconv.Itoa(int(threadNum.CPUPercent)) +", " +
+				output.WriteString(split[idx-1] + ", threadNum = " + threadNum.pid16 + "\n")
+				output.WriteString(line + ", CPUPercent= " + strconv.Itoa(int(threadNum.CPUPercent)) + ", " +
 					"parentCPUPercent = " + strconv.Itoa(int(threadNum.parentCPUPercent)) + "\r\n")
+				output.WriteString(split[idx+1] + "\n")
+				output.WriteString(split[idx+2] + "\n\n")
 			}
 		}
 	}
