@@ -108,7 +108,7 @@ func getThreadDetail2(goPid string, user string) []*SubThread {
 		}
 		sub := &SubThread{
 			pid:        atoi,
-			pid16:      fmt.Sprintf("%x", fields[0]),
+			pid16:      fmt.Sprintf("%x", atoi),
 			CPUPercent: float,
 		}
 		subThreads = append(subThreads, sub)
