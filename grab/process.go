@@ -110,7 +110,7 @@ func getThreadDetail(threads []int) []*SubThread {
 		}
 		return false
 	})
-	if len(subThreads) >= 0 {
+	if len(subThreads) >= 10 {
 		return subThreads[0:10]
 	}else {
 		return subThreads[0:]
