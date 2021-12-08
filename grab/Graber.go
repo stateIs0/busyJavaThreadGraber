@@ -49,7 +49,7 @@ func (p *Police) parseThreadContentAndDump() {
 }
 
 func dumpTopThreadStack(treads []string, pid string) {
-	fileName := pid + ".txt"
+	fileName := pid + "_" + time.Now().String() + ".txt"
 	cmd := "jstack -l " + pid + " > " + fileName
 	command := exec.Command("bash", "-c", cmd)
 
@@ -82,7 +82,7 @@ func dumpTopThreadStack(treads []string, pid string) {
 
 	split := strings.Split(string(content), "\r\n")
 
-	output, _ := os.Open(pid + time.Now().String() + ".txt")
+	output, _ := os.Open(pid + time.Now().String() + ".dump")
 
 	for _, line := range split {
 		for _, threadNum := range treadList {
