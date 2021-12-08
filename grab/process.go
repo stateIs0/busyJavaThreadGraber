@@ -93,6 +93,7 @@ func getThreadDetail(threads []int) []*SubThread {
 
 	for _, tt := range threads {
 		go func(goPid int) {
+			log.Println("--------> 执行 Percent ", goPid)
 			wg.Add(1)
 			subPro, _ := process.NewProcess(int32(goPid))
 			percent, _ := subPro.Percent(3 * time.Second)
