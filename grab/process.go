@@ -112,7 +112,7 @@ func getThreadDetail(threads []int) []*SubThread {
 	})
 	if len(subThreads) >= 10 {
 		return subThreads[0:10]
-	}else {
+	} else {
 		return subThreads[0:]
 	}
 }
@@ -132,6 +132,7 @@ func getSubThread(pid int32) []int {
 	if len(string(output)) > 0 {
 		str := string(output)
 		split := strings.Split(str, "\n")
+		log.Println("子线程数量:", len(split)-1)
 		for i, line := range split {
 			if i == 0 {
 				continue
