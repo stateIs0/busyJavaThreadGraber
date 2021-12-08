@@ -6,30 +6,32 @@ import (
 	"log"
 	"os/exec"
 	"strconv"
-	"time"
 )
 
 func GetThreads(pid int32, threshold float64) []string {
 
-	newProcess, err := process.NewProcess(pid)
+	processes, err := process.Processes()
 	if err != nil {
 		return nil
 	}
+	var root *process.Process
+	for _, p := range processes {
+		if p.Pid == pid {
+			root = p
+			break
+		}
+	}
 
-	percent, err := newProcess.Percent(3 * time.Second)
+	CPUPercent, _ := root.CPUPercent()
+
+	log.Println("pid ", pid, " rootProcess CPUPercent = ",CPUPercent , ", threshold=", threshold)
+
 	if err != nil {
 		log.Println(err)
 		return nil
 	}
 
-	log.Println("pid ", pid, " rootProcess CPUPercent = ", percent, ", threshold=", threshold)
-
-	if err != nil {
-		log.Println(err)
-		return nil
-	}
-
-	if percent < threshold {
+	if CPUPercent < threshold {
 		return nil
 	}
 	cmd := "ps -T -p" + strconv.Itoa(int(pid))
@@ -39,8 +41,8 @@ func GetThreads(pid int32, threshold float64) []string {
 
 	threads := []string{}
 
-	if percent > threshold {
-		children, _ := newProcess.Children()
+	if CPUPercent > threshold {
+		children, _ := root.Children()
 		fmt.Println("children:", children)
 		for _, p := range children {
 			cpuPercent, err := p.CPUPercent()
