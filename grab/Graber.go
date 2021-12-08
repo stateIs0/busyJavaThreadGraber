@@ -33,22 +33,22 @@ func (p *Police) Start() {
 				p.tick = 1
 			}
 			time.Sleep(time.Duration(p.tick) * time.Second)
-			p.parseThreadContentAndDump()
+			p.process()
 		}
 	}()
 }
 
-func (p *Police) parseThreadContentAndDump() {
+func (p *Police) process() {
 
-	thread := GetThreads(p.Pid, float64(p.threshold))
+	busyThread := GrabBusyThreads(p.Pid, float64(p.threshold))
 
-	if thread == nil || len(thread) == 0 {
+	if busyThread == nil || len(busyThread) == 0 {
 		return
 	}
-	dumpTopThreadStack(thread, strconv.Itoa(int(p.Pid)))
+	dumpThreadStack2File(busyThread, strconv.Itoa(int(p.Pid)))
 }
 
-func dumpTopThreadStack(subThreadList []*SubThread, pid string) {
+func dumpThreadStack2File(subThreadList []*SubThread, pid string) {
 	cmd := "jstack -l " + pid
 	command := exec.Command("bash", "-c", cmd)
 
@@ -58,11 +58,10 @@ func dumpTopThreadStack(subThreadList []*SubThread, pid string) {
 		log.Println("jstack error >>>>>>", err)
 		return
 	}
-	log.Println("jstack success")
 
 	split := strings.Split(string(jstackContent), "\n")
 
-	newFile := pid + time.Now().Format(Layout) + ".dump"
+	newFile := pid + time.Now().Format(Layout) + ".txt"
 	jstackFile := pid + time.Now().Format(Layout) + ".jstack"
 	output, err := os.Create(newFile)
 	if err != nil {
@@ -77,21 +76,24 @@ func dumpTopThreadStack(subThreadList []*SubThread, pid string) {
 
 	for idx, line := range split {
 		for _, subThread := range subThreadList {
-			if strings.Contains(line, subThread.pid16) {
-				log.Println("匹配 pid16 ",subThread.pid16 )
-				output.WriteString(line + ",pid16= " + subThread.pid16 + ", CPUPercent= " + strconv.Itoa(int(subThread.CPUPercent)) + ", " +
-					"parentCPUPercent = " + strconv.Itoa(int(subThread.parentCPUPercent)) + "\r\n")
-				for i := idx + 1; i < idx+20; i++ {
-					if i >= len(split) {
-						break
-					}
-					space := strings.TrimSpace(split[i])
-					if len(space) <= 0 {
-						output.WriteString("==========>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" + "\n")
-						break
-					}
-					output.WriteString(split[i] + "\n")
+			if !strings.Contains(line, subThread.pid16) {
+				continue
+			}
+			output.WriteString(line + ",16 进制 ID = " + subThread.pid16 +
+				", 该线程 CPU 使用率 = " + strconv.Itoa(int(subThread.CPUPercent)) + ", " +
+				"Java 进程 CPU 使用率 = " + strconv.Itoa(int(subThread.parentCPUPercent)) + "\r\n")
+
+			for i := idx + 1; i < idx+30; i++ {
+				if i >= len(split) {
+					break
 				}
+				// 有空行了,大概就是这个堆栈结束了.
+				space := strings.TrimSpace(split[i])
+				if len(space) <= 0 {
+					output.WriteString("==========>>>>>>>>>>>>> 分隔符 >>>>>>>>>>>>>>>>>>>>" + "\n")
+					break
+				}
+				output.WriteString(split[i] + "\n")
 			}
 		}
 	}
