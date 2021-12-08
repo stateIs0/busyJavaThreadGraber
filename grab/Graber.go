@@ -43,6 +43,10 @@ func (p *Police) Start() {
 			if nil != err {
 				fmt.Println(err)
 			}
+			if c.Process == nil {
+				fmt.Println("Process PID is nil, golang exit....")
+				return
+			}
 			fmt.Println("Process PID:", c.Process.Pid)
 			err = c.Wait() //等待执行完成
 
