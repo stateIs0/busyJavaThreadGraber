@@ -10,10 +10,10 @@ import (
 
 var Layout = "2006-01-02 15:04:05"
 
-func Get() (float64, float64, float64) {
-	idle0, total0 := getCPUSample()
+func Get(pid string) (float64, float64, float64) {
+	idle0, total0 := getCPUSample(pid)
 	time.Sleep(3 * time.Second)
-	idle1, total1 := getCPUSample()
+	idle1, total1 := getCPUSample(pid)
 
 	idleTicks := float64(idle1 - idle0)
 	totalTicks := float64(total1 - total0)
@@ -23,8 +23,8 @@ func Get() (float64, float64, float64) {
 	return cpuUsage, totalTicks - idleTicks, totalTicks
 }
 
-func getCPUSample() (idle, total uint64) {
-	contents, err := ioutil.ReadFile("/proc/stat")
+func getCPUSample(pid string) (idle, total uint64) {
+	contents, err := ioutil.ReadFile("/proc/" + pid + "/stat")
 	if err != nil {
 		return
 	}

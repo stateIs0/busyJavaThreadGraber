@@ -35,7 +35,7 @@ func (p *Police) Start() {
 			}
 			time.Sleep(time.Duration(p.tick) * time.Second)
 			// 监听 CPU, CPU 触发指标时, 就根据 top 获取 thread, 并抓取堆栈
-			_, f, _ := cpu.Get()
+			_, f, _ := cpu.Get(p.Pid)
 			// 触发
 			if f > p.threshold {
 				p.parseThreadContentAndDump()
