@@ -1,11 +1,11 @@
 package grab
 
 import (
-	"fmt"
 	"github.com/shirou/gopsutil/process"
 	"log"
 	"os/exec"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -47,23 +47,19 @@ func GetThreads(pid int32, threshold float64) []string {
 		log.Println(err)
 		return nil
 	}
-	log.Println("--->>" + strconv.Itoa(int(pid)) + string(output))
-
 	threads := []string{}
+	log.Println("--->>" + strconv.Itoa(int(pid)) + string(output))
+	if len(string(output)) > 0 {
 
-	if percent > threshold {
-		children, _ := newProcess.Children()
-		fmt.Println("children:", children)
-		for _, p := range children {
-			cpuPercent, err := p.CPUPercent()
-			if err != nil {
-				log.Println(err)
-				return nil
+		str := string(output)
+		split := strings.Split(str, "\r\n")
+		for i, line := range split {
+			if i == 0 {
+				continue
 			}
-			log.Println(strconv.Itoa(int(p.Pid))+", cpuPercent =", cpuPercent)
-			if int(cpuPercent) > 10 {
-				threads = append(threads, strconv.Itoa(int(p.Pid)))
-			}
+			lineArr := strings.Split(line, " ")
+			subThread := lineArr[0]
+			threads = append(threads, subThread)
 		}
 	}
 
