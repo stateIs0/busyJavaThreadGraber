@@ -65,8 +65,8 @@ func Get2(pid int) float64 {
 		processes = append(processes, &Process{pid, cpu})
 	}
 	for _, p := range processes {
-		log.Println("Process ", p.pid, " takes ", p.cpu, " % of the CPU")
 		if p.pid == pid {
+			log.Println("Process ", p.pid, " takes ", p.cpu, " % of the CPU")
 			return p.cpu
 		}
 	}
