@@ -3,6 +3,7 @@ package grab
 import (
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 	"os/exec"
 	"strconv"
@@ -84,7 +85,8 @@ func dumpTopThreadStack(treads []string, pid string) {
 	split := strings.Split(string(content), "\r\n")
 
 
-	output, _ := os.Create(pid + time.Now().Format(Layout) + ".dump")
+	newFile := pid + time.Now().Format(Layout) + ".dump"
+	output, _ := os.Create(newFile)
 
 	for _, line := range split {
 		for _, threadNum := range treadList {
@@ -93,5 +95,7 @@ func dumpTopThreadStack(treads []string, pid string) {
 			}
 		}
 	}
+
+	log.Println("dump 成功, file ",newFile )
 
 }
