@@ -27,7 +27,7 @@ func main() {
 	group.Wait()
 }
 
-// ./main -pid 24310 -tick 1 -threshold 8 -sleep 2
+// ./main -pid 24310 -tick 1 -threshold 8
 func parseArgs() {
 	flag.IntVar(&Pid, "pid", 23751, "java pid")
 	flag.Int64Var(&tick, "tick", 1, "check cpu time tick")

@@ -63,9 +63,14 @@ func dumpTopThreadStack(subThreadList []*SubThread, pid string) {
 
 	newFile := pid + time.Now().Format(Layout) + ".dump"
 	jstackFile := pid + time.Now().Format(Layout) + ".jstack"
-	output, _ := os.Create(newFile)
-	jstackFileoutput, _ := os.Create(jstackFile)
-
+	output, err := os.Create(newFile)
+	if err != nil {
+		log.Println(err)
+	}
+	jstackFileoutput, err := os.Create(jstackFile)
+	if err != nil {
+		log.Println(err)
+	}
 	jstackFileoutput.Write(jstackContent)
 	jstackFileoutput.Close()
 
@@ -74,12 +79,12 @@ func dumpTopThreadStack(subThreadList []*SubThread, pid string) {
 			if strings.Contains(line, subThread.pid16) {
 				output.WriteString(line + ",pid16= " + subThread.pid16 + ", CPUPercent= " + strconv.Itoa(int(subThread.CPUPercent)) + ", " +
 					"parentCPUPercent = " + strconv.Itoa(int(subThread.parentCPUPercent)) + "\r\n")
-				for i := idx + 1 ; i < idx + 20; i++ {
+				for i := idx + 1; i < idx+20; i++ {
 					if i >= len(split) {
 						break
 					}
 					space := strings.TrimSpace(split[i])
-					if  len(space) <= 0{
+					if len(space) <= 0 {
 						output.WriteString("==========>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" + "\n")
 						break
 					}
