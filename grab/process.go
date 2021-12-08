@@ -6,9 +6,9 @@ import (
 	"os/exec"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 )
-
 
 func GetThreads(pid int32, threshold float64) []string {
 
@@ -49,7 +49,8 @@ func GetThreads(pid int32, threshold float64) []string {
 		return nil
 	}
 	threads := []string{}
-	var count = 0
+	wg := sync.WaitGroup{}
+	stop := make(chan string)
 	if len(string(output)) > 0 {
 
 		str := string(output)
@@ -70,8 +71,8 @@ func GetThreads(pid int32, threshold float64) []string {
 			if err != nil {
 				continue
 			}
-			count += 1
 			go func() {
+				wg.Add(1)
 				subPro, _ := process.NewProcess(int32(atoi))
 				percent, _ := subPro.Percent(3 * time.Second)
 				s := SubThread{
@@ -80,25 +81,27 @@ func GetThreads(pid int32, threshold float64) []string {
 				}
 				chann <- s
 			}()
-
 		}
 
-		for true {
-			select {
-			case data, ok := <-chann:
-				if ok {
-					if data.CPUPercent > 10 {
-						threads = append(threads, data.pid)
+		go func() {
+			for true {
+				select {
+				case data, ok := <-chann:
+					wg.Done()
+					if ok {
+						if data.CPUPercent > 10 {
+							threads = append(threads, data.pid)
+						}
 					}
-				}
-			default:
-				if len(threads) >= count {
-					log.Println("threads len --->> 2 " + strconv.Itoa(len(threads)))
-					return threads
+				case <-stop:
+					return
 				}
 			}
-		}
+		}()
+
 	}
+	wg.Wait()
+	stop <- ""
 	log.Println("threads len --->>" + strconv.Itoa(len(threads)))
 	return threads
 
