@@ -92,18 +92,17 @@ func getThreadDetail(threads []int) []*SubThread {
 	}()
 
 	for _, tt := range threads {
-		pdi := tt
-		go func() {
+		go func(goPid int) {
 			wg.Add(1)
-			subPro, _ := process.NewProcess(int32(pdi))
+			subPro, _ := process.NewProcess(int32(goPid))
 			percent, _ := subPro.Percent(3 * time.Second)
 			s := &SubThread{
-				pid:        pdi,
+				pid:        goPid,
 				CPUPercent: percent,
-				pid16:      fmt.Sprintf("%x", pdi),
+				pid16:      fmt.Sprintf("%x", goPid),
 			}
 			chann <- s
-		}()
+		}(tt)
 	}
 
 	wg.Wait()
