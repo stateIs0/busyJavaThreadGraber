@@ -21,8 +21,11 @@ func GetThreads(pid int32, threshold float64) []string {
 		log.Println(err)
 		return nil
 	}
-
-	log.Println("pid ", pid, " rootProcess percent = ", percent, ", threshold=", threshold)
+	name, err := newProcess.Name()
+	if err != nil {
+		return nil
+	}
+	log.Println("pid ", name, " rootProcess percent = ", percent, ", threshold=", threshold)
 	if percent == 0 {
 		return nil
 	}
@@ -41,8 +44,8 @@ func GetThreads(pid int32, threshold float64) []string {
 
 	output, err := c.CombinedOutput()
 	if err != nil {
-		 log.Println(err)
-		 return nil
+		log.Println(err)
+		return nil
 	}
 	log.Println("--->>" + strconv.Itoa(int(pid)) + string(output))
 
