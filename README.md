@@ -2,7 +2,7 @@
 抓取最繁忙的 N 个 Java 线程。
 
 # 使用
-1. 按照 go
+1. 安装 go
 2. cd cmd; go build
 3. ./main -pid {java pid} -tick 1 -threshold 50 前台运行该程序
 4. 如触发阈值，则 dump 文件，文件格式：pid + 时间 + .dump
