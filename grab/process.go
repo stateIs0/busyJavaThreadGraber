@@ -96,15 +96,14 @@ func getThreadDetail2(goPid string, user string) []*SubThread {
 	log.Println(lines)
 	log.Println(len(lines))
 	for _, line := range lines {
-		strings.Fields(line)
-		log.Println("line ", line)
+		fields := strings.Fields(line)
 		arr := strings.Split(line, " ")
-		atoi, err := strconv.Atoi(arr[0])
+		atoi, err := strconv.Atoi(fields[0])
 		if err != nil {
 			log.Println("atoi ", atoi)
 			return nil
 		}
-		float, err := strconv.ParseFloat(arr[8], 32)
+		float, err := strconv.ParseFloat(fields[8], 32)
 		if err != nil {
 			log.Println("float ", float)
 			return nil
