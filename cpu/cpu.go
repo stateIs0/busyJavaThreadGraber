@@ -1,13 +1,14 @@
 package cpu
 
 import (
-	"awesomeProject1/grab"
 	"fmt"
 	"io/ioutil"
 	"strconv"
 	"strings"
 	"time"
 )
+
+var Layout = "2006-01-02 15:04:05"
 
 func Get() (float64, float64, float64) {
 	idle0, total0 := getCPUSample()
@@ -18,7 +19,7 @@ func Get() (float64, float64, float64) {
 	totalTicks := float64(total1 - total0)
 	cpuUsage := 100 * (totalTicks - idleTicks) / totalTicks
 	// usage busy total
-	fmt.Printf(time.Now().Format(grab.Layout)+": CPU usage is %f%% [busy: %f, total: %f]\n", cpuUsage, totalTicks-idleTicks, totalTicks)
+	fmt.Printf(time.Now().Format(Layout)+": CPU usage is %f%% [busy: %f, total: %f]\n", cpuUsage, totalTicks-idleTicks, totalTicks)
 	return cpuUsage, totalTicks - idleTicks, totalTicks
 }
 
