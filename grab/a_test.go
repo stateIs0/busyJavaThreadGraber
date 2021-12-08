@@ -26,7 +26,6 @@ func Test1212121(t *testing.T) {
 		arr := strings.Split(value, " ")
 		fmt.Println(arr[1])
 	}
-	Handler([]byte(s))
 
 }
 

@@ -33,14 +33,68 @@ func GetThreads(pid int32, threshold float64) []SubThread {
 		return nil
 	}
 
-	if err != nil {
-		log.Println(err)
-		return nil
-	}
+	thread := getSubThread(pid)
+	detailSubThread := getThreadDetail(thread, parentCPUPercent)
 
 	if parentCPUPercent < threshold {
 		return nil
 	}
+
+	return detailSubThread
+}
+
+func getThreadDetail(threads []int, parentCPUPercent float64) []SubThread{
+	subThreads := []SubThread{}
+	stop := make(chan string)
+	wg := sync.WaitGroup{}
+	chann := make(chan SubThread, len(threads))
+
+	go func() {
+		for true {
+			select {
+			case data, ok := <-chann:
+				wg.Done()
+				if ok {
+					if data.CPUPercent >= 0 {
+						subThreads = append(subThreads, data)
+					}
+				}
+			case <-stop:
+				return
+			}
+		}
+	}()
+
+	for _, tt := range threads {
+		go func() {
+			wg.Add(1)
+			subPro, _ := process.NewProcess(int32(tt))
+			percent, _ := subPro.Percent(2 * time.Second)
+			s := SubThread{
+				pid:              tt,
+				CPUPercent:       percent,
+				pid16:            fmt.Sprintf("%x", tt),
+				parentCPUPercent: parentCPUPercent,
+			}
+			chann <- s
+		}()
+	}
+
+	wg.Wait()
+	stop <- ""
+	sort.SliceStable(subThreads, func(i, j int) bool {
+		if subThreads[i].CPUPercent > subThreads[j].CPUPercent {
+			return true
+		}
+		return false
+	})
+	log.Println("threads len --->>", subThreads[0:10])
+	return subThreads[0:10]
+}
+
+func getSubThread(pid int32) []int {
+
+	result := []int{}
 
 	cmd := "ps -T -p " + strconv.Itoa(int(pid))
 	c := exec.Command("bash", "-c", cmd)
@@ -48,23 +102,11 @@ func GetThreads(pid int32, threshold float64) []SubThread {
 	output, err := c.CombinedOutput()
 	if err != nil {
 		log.Println(err)
-		return nil
 	}
-	return Handler(output, parentCPUPercent)
 
-}
-
-func Handler(output []byte, parentCPUPercent float64) []SubThread {
-	threads := []SubThread{}
-	wg := sync.WaitGroup{}
-	stop := make(chan string)
 	if len(string(output)) > 0 {
-
 		str := string(output)
 		split := strings.Split(str, "\n")
-
-		chann := make(chan SubThread, len(split)-1)
-
 		for i, line := range split {
 			if i == 0 {
 				continue
@@ -78,52 +120,17 @@ func Handler(output []byte, parentCPUPercent float64) []SubThread {
 			if err != nil {
 				continue
 			}
-			go func() {
-				wg.Add(1)
-				subPro, _ := process.NewProcess(int32(atoi))
-				percent, _ := subPro.Percent(3 * time.Second)
-				s := SubThread{
-					pid:        atoi,
-					CPUPercent: percent,
-					pid16: fmt.Sprintf("%x", atoi),
-					parentCPUPercent: parentCPUPercent,
-				}
-				chann <- s
-			}()
+			result = append(result, atoi)
 		}
-
-		go func() {
-			for true {
-				select {
-				case data, ok := <-chann:
-					wg.Done()
-					if ok {
-						if data.CPUPercent >= 0 {
-							threads = append(threads, data)
-						}
-					}
-				case <-stop:
-					return
-				}
-			}
-		}()
-
 	}
-	wg.Wait()
-	stop <- ""
-	sort.SliceStable(threads, func(i, j int) bool {
-		if threads[i].CPUPercent > threads[j].CPUPercent {
-			return true
-		}
-		return false
-	})
-	log.Println("threads len --->>", threads[0:10])
-	return threads[0:10]
+
+	return result
+
 }
 
 type SubThread struct {
-	pid        int
-	pid16      string
+	pid              int
+	pid16            string
 	parentCPUPercent float64
-	CPUPercent float64
+	CPUPercent       float64
 }
