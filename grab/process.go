@@ -82,7 +82,7 @@ func GetThreads(pid int32, threshold float64) []*SubThread {
 29618 vale      20   0 6697940  91448  12452 S  0.0  0.6   0:00.06 java
 */
 func getThreadDetail2(goPid string, user string) []*SubThread {
-	shell := fmt.Sprintf("(top -n 1 -Hp %s | grep %s | head -10 | sed 's/\\x1b\\x28\\x42\\x1b\\[m//' | sed 's/\\x1b\\[1m//' | sed s/[[:space:]]/\\ /g)", goPid, user)
+	shell := fmt.Sprintf("(top  -bn 1 -Hp %s | grep %s | head -10 | sed 's/\\x1b\\x28\\x42\\x1b\\[m//' | sed 's/\\x1b\\[1m//' | sed s/[[:space:]]/\\ /g)", goPid, user)
 	command := exec.Command("bash", "-c", shell)
 
 	// 可能没权限.
