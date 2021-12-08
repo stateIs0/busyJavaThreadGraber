@@ -92,7 +92,7 @@ func getThreadDetail(threads []int) []*SubThread {
 		go func() {
 			wg.Add(1)
 			subPro, _ := process.NewProcess(int32(pdi))
-			percent, _ := subPro.Percent(2 * time.Second)
+			percent, _ := subPro.Percent(3 * time.Second)
 			s := &SubThread{
 				pid:        pdi,
 				CPUPercent: percent,
@@ -141,6 +141,7 @@ func getSubThread(pid int32) []int {
 			if len(lineArr) < 2 {
 				continue
 			}
+			// 线程号
 			subThread := lineArr[1]
 			atoi, err := strconv.Atoi(subThread)
 			if err != nil {
