@@ -30,7 +30,7 @@ func getParentThreadState(pid1 int32, channle chan float64) {
 	channle <- parentCPUPercent
 }
 
-func GetThreads(pid int32, threshold float64) []SubThread {
+func GetThreads(pid int32, threshold float64) []*SubThread {
 
 	getParentThreadStateResult := make(chan float64)
 	// 获取进程的状态
@@ -65,11 +65,11 @@ func GetThreads(pid int32, threshold float64) []SubThread {
 	return detailSubThread
 }
 
-func getThreadDetail(threads []int) []SubThread {
-	subThreads := []SubThread{}
+func getThreadDetail(threads []int) []*SubThread {
+	subThreads := []*SubThread{}
 	stop := make(chan string)
 	wg := sync.WaitGroup{}
-	chann := make(chan SubThread, len(threads))
+	chann := make(chan *SubThread, len(threads))
 
 	go func() {
 		for true {
@@ -93,7 +93,7 @@ func getThreadDetail(threads []int) []SubThread {
 			wg.Add(1)
 			subPro, _ := process.NewProcess(int32(pdi))
 			percent, _ := subPro.Percent(2 * time.Second)
-			s := SubThread{
+			s := &SubThread{
 				pid:        pdi,
 				CPUPercent: percent,
 				pid16:      fmt.Sprintf("%x", pdi),

@@ -49,7 +49,7 @@ func (p *Police) parseThreadContentAndDump() {
 	dumpTopThreadStack(thread, strconv.Itoa(int(p.Pid)))
 }
 
-func dumpTopThreadStack(subThreadList []SubThread, pid string) {
+func dumpTopThreadStack(subThreadList []*SubThread, pid string) {
 	cmd := "jstack -l " + pid
 	command := exec.Command("bash", "-c", cmd)
 
@@ -71,10 +71,10 @@ func dumpTopThreadStack(subThreadList []SubThread, pid string) {
 	jstackFileoutput.Close()
 
 	for idx, line := range split {
-		for _, threadNum := range subThreadList {
-			if strings.Contains(line, threadNum.pid16) {
-				output.WriteString(line + ",pid16= " + threadNum.pid16 + ", CPUPercent= " + strconv.Itoa(int(threadNum.CPUPercent)) + ", " +
-					"parentCPUPercent = " + strconv.Itoa(int(threadNum.parentCPUPercent)) + "\r\n")
+		for _, subThread := range subThreadList {
+			if strings.Contains(line, subThread.pid16) {
+				output.WriteString(line + ",pid16= " + subThread.pid16 + ", CPUPercent= " + strconv.Itoa(int(subThread.CPUPercent)) + ", " +
+					"parentCPUPercent = " + strconv.Itoa(int(subThread.parentCPUPercent)) + "\r\n")
 				for i := idx + 1 ; i < idx + 20; i++ {
 					if i >= len(split) {
 						break
