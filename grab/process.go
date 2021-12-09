@@ -2,6 +2,7 @@ package grab
 
 import (
 	"fmt"
+	"github.com/shirou/gopsutil/process"
 	"log"
 	"os/exec"
 	"strconv"
@@ -62,57 +63,25 @@ S
 140732853407689
 0
 */
-
-var pre_utime int
-var pre_stime int
-
 func getParentThreadState(pid1 int32, channle chan float64, tick int) {
 
-	shell := fmt.Sprintf("cat /proc/%s/stat", strconv.Itoa(int(pid1)))
-
-	command := exec.Command("bash", "-c", shell)
-	// 可能没权限.
-	result, err := command.CombinedOutput()
+	newProcess, err := process.NewProcess(pid1)
 	if err != nil {
-		log.Println("top fail ", err, ", shell =", shell)
-	}
-
-	array := strings.Split(string(result), " ")
-	// (utime2 + stime2 - utime1 - stime1)/(t2-t1)
-	utime, _ := strconv.Atoi(array[14]) // 用户代码中花费的CPU时间，以时钟滴答为单位
-	stime, _ := strconv.Atoi(array[15]) // 内核代码中花费的CPU时间，以时钟周期为单位
-	//cutime := array[16]
-	//cstime := array[17]
-	time.Sleep(time.Duration(tick) * time.Second)
-	if pre_utime == 0 {
-		pre_utime = utime
-		pre_stime = stime
-		channle <- float64(0)
 		return
 	}
 
-	resu := (utime + stime - pre_stime - pre_stime) / (tick * 1000)
-	pre_utime = utime
-	pre_stime = stime
+	parentCPUPercent, err := newProcess.Percent(time.Duration(tick) * time.Second)
+	if err != nil {
+		log.Println(err)
+		channle <- parentCPUPercent
+		return
+	}
 
-	fmt.Println("resu = ", resu)
-	//newProcess, err := process.NewProcess(pid1)
-	//if err != nil {
-	//	return
-	//}
-
-	//parentCPUPercent, err := newProcess.Percent(time.Duration(tick) * time.Second)
-	//if err != nil {
-	//	log.Println(err)
-	//	channle <- parentCPUPercent
-	//	return
-	//}
-	//
-	//if parentCPUPercent == 0 {
-	//	channle <- parentCPUPercent
-	//	return
-	//}
-	channle <- float64(resu / 1000)
+	if parentCPUPercent == 0 {
+		channle <- parentCPUPercent
+		return
+	}
+	channle <- parentCPUPercent
 }
 
 func GrabBusyThreads(pid int32, threshold float64, tick int, threadNum int, user string) []*SubThread {
