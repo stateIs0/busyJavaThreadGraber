@@ -84,7 +84,7 @@ func getParentThreadState(pid1 int32, channle chan float64, tick int) {
 	//cutime := array[16]
 	//cstime := array[17]
 	time.Sleep(time.Duration(tick) * time.Second)
-	if utime == 0 {
+	if pre_utime == 0 {
 		pre_utime = utime
 		pre_stime = stime
 		channle <- float64(0)
