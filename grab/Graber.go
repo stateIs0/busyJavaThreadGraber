@@ -16,13 +16,17 @@ type Police struct {
 	tick      int64
 	threshold int
 	sleep     int
+	threadNum int
+	user string
 }
 
-func NewPolice(Pid int32, tick int64, threshold int) *Police {
+func NewPolice(Pid int32, tick int64, threshold int, threadNum int, user string) *Police {
 	return &Police{
 		Pid:       Pid,
 		tick:      tick,
 		threshold: threshold,
+		threadNum: threadNum,
+		user: user,
 	}
 }
 
@@ -32,7 +36,6 @@ func (p *Police) Start() {
 			if p.tick == 0 {
 				p.tick = 1
 			}
-			time.Sleep(time.Duration(p.tick) * time.Second)
 			p.process()
 		}
 	}()
@@ -40,7 +43,7 @@ func (p *Police) Start() {
 
 func (p *Police) process() {
 
-	busyThread := GrabBusyThreads(p.Pid, float64(p.threshold))
+	busyThread := GrabBusyThreads(p.Pid, float64(p.threshold), int(p.tick), p.threadNum, p.user)
 
 	if busyThread == nil || len(busyThread) == 0 {
 		return
@@ -79,7 +82,7 @@ func dumpThreadStack2File(subThreadList []*SubThread, pid string) {
 			if !strings.Contains(line, subThread.pid16) {
 				continue
 			}
-			output.WriteString(line + ",16 进制 ID = " + subThread.pid16 +
+			output.WriteString(line + ",16进制 ID = " + subThread.pid16 +
 				", 该线程 CPU 使用率 = " + strconv.Itoa(int(subThread.CPUPercent)) + ", " +
 				"Java 进程 CPU 使用率 = " + strconv.Itoa(int(subThread.parentCPUPercent)) + "\r\n")
 

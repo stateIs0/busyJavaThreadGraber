@@ -10,13 +10,13 @@ import (
 	"time"
 )
 
-func getParentThreadState(pid1 int32, channle chan float64) {
+func getParentThreadState(pid1 int32, channle chan float64, tick int ) {
 	newProcess, err := process.NewProcess(pid1)
 	if err != nil {
 		return
 	}
 
-	parentCPUPercent, err := newProcess.Percent(3 * time.Second)
+	parentCPUPercent, err := newProcess.Percent(time.Duration(tick) * time.Second)
 	if err != nil {
 		log.Println(err)
 		return
@@ -28,22 +28,22 @@ func getParentThreadState(pid1 int32, channle chan float64) {
 	channle <- parentCPUPercent
 }
 
-func GrabBusyThreads(pid int32, threshold float64) []*SubThread {
+func GrabBusyThreads(pid int32, threshold float64, tick int, threadNum int, user string) []*SubThread {
 
 	getParentThreadStateResult := make(chan float64)
 	// 获取进程的状态
-	go func() { getParentThreadState(pid, getParentThreadStateResult) }()
-	// 获取子进程详情
-	detailSubThread := getThreadDetail(strconv.Itoa(int(pid)), "vale")
+	go func() { getParentThreadState(pid, getParentThreadStateResult, tick) }()
+	// 获取线程详情
+	detailSubThread := getThreadDetail(strconv.Itoa(int(pid)), user, threadNum)
 	if len(detailSubThread) <= 0 {
-		log.Println("子线程数量为0, 不需要这个工具了.")
+		log.Println("子线程数量为0, 难道不是 Java 进程?")
 		return nil
 	}
 
 	var parentCPUPercent = 0.0
 
 	select {
-	// 等待结果
+	// 等待进程的统计结果
 	case data := <-getParentThreadStateResult:
 		parentCPUPercent = data
 	// 超时 5s
@@ -75,9 +75,12 @@ func GrabBusyThreads(pid int32, threshold float64) []*SubThread {
 29637 vale      20   0 6697940  91448  12452 S  6.7  0.6   1:56.87 Thread-8
 29617 vale      20   0 6697940  91448  12452 S  0.0  0.6   0:00.00 java
 29618 vale      20   0 6697940  91448  12452 S  0.0  0.6   0:00.06 java
+
+指定进程, 指定 user, 指定 top n 线程数.
+
 */
-func getThreadDetail(goPid string, user string) []*SubThread {
-	shell := fmt.Sprintf("(top  -bn 1 -Hp %s | grep %s | head -10 | sed 's/\\x1b\\x28\\x42\\x1b\\[m//' | sed 's/\\x1b\\[1m//' | sed s/[[:space:]]/\\ /g)", goPid, user)
+func getThreadDetail(goPid string, user string, threadNum int) []*SubThread {
+	shell := fmt.Sprintf("(top  -bn 1 -Hp %s | grep %s | head -%s | sed 's/\\x1b\\x28\\x42\\x1b\\[m//' | sed 's/\\x1b\\[1m//' | sed s/[[:space:]]/\\ /g)", goPid, user, threadNum)
 	command := exec.Command("bash", "-c", shell)
 
 	// 可能没权限.
