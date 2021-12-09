@@ -19,10 +19,12 @@ func getParentThreadState(pid1 int32, channle chan float64, tick int ) {
 	parentCPUPercent, err := newProcess.Percent(time.Duration(tick) * time.Second)
 	if err != nil {
 		log.Println(err)
+		channle <- parentCPUPercent
 		return
 	}
 
 	if parentCPUPercent == 0 {
+		channle <- parentCPUPercent
 		return
 	}
 	channle <- parentCPUPercent
