@@ -33,13 +33,6 @@ func GrabBusyThreads(pid int32, threshold float64, tick int, threadNum int, user
 	getParentThreadStateResult := make(chan float64)
 	// 获取进程的状态
 	go func() { getParentThreadState(pid, getParentThreadStateResult, tick) }()
-	// 获取线程详情
-	detailSubThread := getThreadDetail(strconv.Itoa(int(pid)), user, threadNum)
-	if len(detailSubThread) <= 0 {
-		log.Println("子线程数量为0, 难道不是 Java 进程?")
-		time.Sleep(time.Duration(tick) * time.Second)
-		return nil
-	}
 
 	var parentCPUPercent = 0.0
 
@@ -55,6 +48,13 @@ func GrabBusyThreads(pid int32, threshold float64, tick int, threadNum int, user
 	log.Println("pid ", pid, " Java 进程 cpu 率 = ", parentCPUPercent, ", 触发 dump 阈值 = ", threshold)
 
 	if parentCPUPercent < threshold {
+		return nil
+	}
+	// 获取线程详情
+	detailSubThread := getThreadDetail(strconv.Itoa(int(pid)), user, threadNum)
+	if len(detailSubThread) <= 0 {
+		log.Println("子线程数量为0, 难道不是 Java 进程?")
+		time.Sleep(time.Duration(tick) * time.Second)
 		return nil
 	}
 
