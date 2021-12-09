@@ -2,7 +2,6 @@ package grab
 
 import (
 	"fmt"
-	"github.com/shirou/gopsutil/process"
 	"log"
 	"os/exec"
 	"strconv"
@@ -10,24 +9,100 @@ import (
 	"time"
 )
 
-func getParentThreadState(pid1 int32, channle chan float64, tick int ) {
-	newProcess, err := process.NewProcess(pid1)
+/*
+23751
+(java)
+S
+1
+23738
+23738
+0
+-1
+1077944320
+127006943
+113
+2632
+1
+251684789 index 13
+133534615 index 14
+0
+0
+20
+0
+388
+0
+3551035311
+15954280448
+2554990
+18446744073709551615
+4194304
+4196468
+140732853405344
+140732853387888
+139854695292663
+0
+0
+3
+16800972
+18446744073709551615
+0
+0
+17
+2
+0
+0
+0
+0
+0
+6293624
+6294260 6955008
+140732853406194
+140732853407080
+140732853407080
+140732853407689
+0
+*/
+
+var pre_utime int
+var pre_stime int
+
+func getParentThreadState(pid1 int32, channle chan float64, tick int) {
+
+	shell := fmt.Sprintf("cat /proc/%s/stat", strconv.Itoa(int(pid1)))
+
+	command := exec.Command("bash", "-c", shell)
+	// 可能没权限.
+	result, err := command.CombinedOutput()
 	if err != nil {
-		return
+		log.Println("top fail ", err, ", shell =", shell)
 	}
 
-	parentCPUPercent, err := newProcess.Percent(time.Duration(tick) * time.Second)
-	if err != nil {
-		log.Println(err)
-		channle <- parentCPUPercent
-		return
-	}
+	array := strings.Split(string(result), " ")
+	// (utime2 + stime2 - utime1 - stime1)/(t2-t1)
+	utime, _ := strconv.Atoi(array[13]) // 用户代码中花费的CPU时间，以时钟滴答为单位
+	stime, _ := strconv.Atoi(array[14]) // 内核代码中花费的CPU时间，以时钟周期为单位
+	//cutime := array[16]
+	//cstime := array[17]
+	time.Sleep(time.Duration(tick) * time.Second)
+	resu := (utime + stime - pre_stime - pre_stime) / (tick * 1000)
+	fmt.Println("resu = ", resu)
+	//newProcess, err := process.NewProcess(pid1)
+	//if err != nil {
+	//	return
+	//}
 
-	if parentCPUPercent == 0 {
-		channle <- parentCPUPercent
-		return
-	}
-	channle <- parentCPUPercent
+	//parentCPUPercent, err := newProcess.Percent(time.Duration(tick) * time.Second)
+	//if err != nil {
+	//	log.Println(err)
+	//	channle <- parentCPUPercent
+	//	return
+	//}
+	//
+	//if parentCPUPercent == 0 {
+	//	channle <- parentCPUPercent
+	//	return
+	//}
+	channle <- float64(resu)
 }
 
 func GrabBusyThreads(pid int32, threshold float64, tick int, threadNum int, user string) []*SubThread {
@@ -129,7 +204,7 @@ type SubThread struct {
 	CPUPercent       float64
 }
 
-func (s *SubThread) String() string  {
+func (s *SubThread) String() string {
 	return fmt.Sprintf("pid %d, pid16 %x, parentCPUPercent %f, CPUPercent %f \n",
 		s.pid, s.pid16, s.parentCPUPercent, s.CPUPercent)
 }
