@@ -79,8 +79,8 @@ func getParentThreadState(pid1 int32, channle chan float64, tick int) {
 
 	array := strings.Split(string(result), " ")
 	// (utime2 + stime2 - utime1 - stime1)/(t2-t1)
-	utime, _ := strconv.Atoi(array[13]) // 用户代码中花费的CPU时间，以时钟滴答为单位
-	stime, _ := strconv.Atoi(array[14]) // 内核代码中花费的CPU时间，以时钟周期为单位
+	utime, _ := strconv.Atoi(array[14]) // 用户代码中花费的CPU时间，以时钟滴答为单位
+	stime, _ := strconv.Atoi(array[15]) // 内核代码中花费的CPU时间，以时钟周期为单位
 	//cutime := array[16]
 	//cstime := array[17]
 	time.Sleep(time.Duration(tick) * time.Second)
@@ -112,7 +112,7 @@ func getParentThreadState(pid1 int32, channle chan float64, tick int) {
 	//	channle <- parentCPUPercent
 	//	return
 	//}
-	channle <- float64(resu)
+	channle <- float64(resu / 1000)
 }
 
 func GrabBusyThreads(pid int32, threshold float64, tick int, threadNum int, user string) []*SubThread {
