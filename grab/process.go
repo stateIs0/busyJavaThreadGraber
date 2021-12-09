@@ -2,7 +2,7 @@ package grab
 
 import (
 	"fmt"
-	"github.com/shirou/gopsutil/process"
+	"github.com/shirou/gopsutil/v3/process"
 	"log"
 	"os/exec"
 	"strconv"
