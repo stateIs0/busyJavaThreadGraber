@@ -37,6 +37,7 @@ func GrabBusyThreads(pid int32, threshold float64, tick int, threadNum int, user
 	detailSubThread := getThreadDetail(strconv.Itoa(int(pid)), user, threadNum)
 	if len(detailSubThread) <= 0 {
 		log.Println("子线程数量为0, 难道不是 Java 进程?")
+		time.Sleep(time.Duration(tick) * time.Second)
 		return nil
 	}
 
@@ -80,7 +81,9 @@ func GrabBusyThreads(pid int32, threshold float64, tick int, threadNum int, user
 
 */
 func getThreadDetail(goPid string, user string, threadNum int) []*SubThread {
-	shell := fmt.Sprintf("(top  -bn 1 -Hp %s | grep %s | head -%s | sed 's/\\x1b\\x28\\x42\\x1b\\[m//' | sed 's/\\x1b\\[1m//' | sed s/[[:space:]]/\\ /g)", goPid, user, threadNum)
+	shell := fmt.Sprintf("(top  -bn 1 -Hp %s | grep %s | head -%s | sed 's/\\x1b\\x28\\x42\\x1b\\[m//' | sed 's/\\x1b\\[1m//' | sed s/[[:space:]]/\\ /g)",
+		goPid, user, strconv.Itoa(threadNum))
+
 	command := exec.Command("bash", "-c", shell)
 
 	// 可能没权限.

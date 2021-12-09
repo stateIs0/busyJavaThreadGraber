@@ -10,9 +10,16 @@
 4. 如触发阈值(例如 50），程序会自动 dump 文件，文件格式：pid + 时间 + .txt
 
 参数介绍：
+
 -pid java 进程 id
+
 -tick 抓取间隔
+
 -threshold cpu 阈值， 触发阈值则抓取堆栈
+
+-threadNum 要抓取的线程数
+
+-user java 进程所属用户名
 
 # 效果
 ![](stack.png)
