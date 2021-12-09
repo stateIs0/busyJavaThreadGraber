@@ -10,59 +10,6 @@ import (
 	"time"
 )
 
-/*
-23751
-(java)
-S
-1
-23738
-23738
-0
--1
-1077944320
-127006943
-113
-2632
-1
-251684789 index 13
-133534615 index 14
-0
-0
-20
-0
-388
-0
-3551035311
-15954280448
-2554990
-18446744073709551615
-4194304
-4196468
-140732853405344
-140732853387888
-139854695292663
-0
-0
-3
-16800972
-18446744073709551615
-0
-0
-17
-2
-0
-0
-0
-0
-0
-6293624
-6294260 6955008
-140732853406194
-140732853407080
-140732853407080
-140732853407689
-0
-*/
 func getParentThreadState(pid1 int32, channle chan float64, tick int) {
 
 	newProcess, err := process.NewProcess(pid1)
@@ -107,7 +54,27 @@ func GrabBusyThreads(pid int32, threshold float64, tick int, threadNum int, user
 		return nil
 	}
 	// 获取线程详情
-	detailSubThread := getThreadDetail(strconv.Itoa(int(pid)), user, threadNum)
+	m := map[string]*SubThread{}
+	// 多执行几遍, top 可能会漏掉.
+	for i := 0; i < 5; i++ {
+		detailSubThread := getThreadDetail(strconv.Itoa(int(pid)), user, threadNum)
+		for _, thread := range detailSubThread {
+			old, ok := m[thread.pid16]
+			if ok {
+				// 如果老数据, 少于新数据, 就用新的.
+				if old.CPUPercent < thread.CPUPercent {
+					m[thread.pid16] = thread
+				}
+			} else {
+				m[thread.pid16] = thread
+			}
+		}
+	}
+	detailSubThread := []*SubThread{}
+	for _, thread := range m {
+		detailSubThread = append(detailSubThread, thread)
+	}
+
 	if len(detailSubThread) <= 0 {
 		log.Println("子线程数量为0, 难道不是 Java 进程?")
 		time.Sleep(time.Duration(tick) * time.Second)
